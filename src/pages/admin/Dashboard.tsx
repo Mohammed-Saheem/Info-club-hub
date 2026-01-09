@@ -1,20 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Code, Users, Image } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { statsAPI } from "@/lib/api";
 import { StatsCard } from "@/components/ui/stats-card";
 
 export default function AdminDashboard() {
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
-    queryFn: async () => {
-      const [events, projects, team, gallery] = await Promise.all([
-        supabase.from("events").select("id", { count: "exact", head: true }),
-        supabase.from("projects").select("id", { count: "exact", head: true }),
-        supabase.from("team_members").select("id", { count: "exact", head: true }),
-        supabase.from("gallery_photos").select("id", { count: "exact", head: true }),
-      ]);
-      return { events: events.count || 0, projects: projects.count || 0, team: team.count || 0, gallery: gallery.count || 0 };
-    },
+    queryFn: () => statsAPI.getAdminStats(),
   });
 
   return (

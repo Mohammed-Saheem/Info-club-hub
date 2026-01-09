@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { teamAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -13,19 +13,25 @@ export default function AdminTeam() {
 
   const { data: members } = useQuery({
     queryKey: ["admin-team"],
-    queryFn: async () => { const { data } = await supabase.from("team_members").select("*").order("display_order"); return data || []; },
+    queryFn: () => teamAPI.getAll(),
   });
 
   const createMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      await supabase.from("team_members").insert({ name: formData.get("name") as string, role: formData.get("role") as string, email: formData.get("email") as string, linkedin_url: formData.get("linkedin") as string, github_url: formData.get("github") as string });
+      await teamAPI.create({
+        name: formData.get("name") as string,
+        role: formData.get("role") as string,
+        email: formData.get("email") as string || undefined,
+        linkedin_url: formData.get("linkedin") as string || undefined,
+        github_url: formData.get("github") as string || undefined,
+      });
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-team"] }); toast.success("Member added!"); setOpen(false); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-team"] }); queryClient.invalidateQueries({ queryKey: ["team-members"] }); toast.success("Member added!"); setOpen(false); },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await supabase.from("team_members").delete().eq("id", id); },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-team"] }); toast.success("Member removed!"); },
+    mutationFn: async (id: string) => { await teamAPI.delete(id); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-team"] }); queryClient.invalidateQueries({ queryKey: ["team-members"] }); toast.success("Member removed!"); },
   });
 
   return (

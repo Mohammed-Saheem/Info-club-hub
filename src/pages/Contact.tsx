@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Mail, Phone, MapPin, Send, Sparkles, ArrowRight } from "lucide-react";
+import { contactAPI } from "@/lib/api";
 import PageLayout from "@/components/layout/PageLayout";
-import { Section, SectionHeader } from "@/components/ui/section";
+import { Section } from "@/components/ui/section";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { GlowingOrbs, FloatingParticles } from "@/components/ui/ambient-effects";
+import { GradientText } from "@/components/ui/animated-text";
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,88 +19,127 @@ export default function Contact() {
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     
-    const { error } = await supabase.from("contact_submissions").insert({
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      message: formData.get("message") as string,
-    });
-
-    if (error) {
-      toast.error("Failed to send message. Please try again.");
-    } else {
+    try {
+      await contactAPI.submit({
+        name: formData.get("name") as string,
+        email: formData.get("email") as string,
+        message: formData.get("message") as string,
+      });
       toast.success("Message sent successfully!");
       (e.target as HTMLFormElement).reset();
-    }
-    setIsSubmitting(false);
-  };
-
-  const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    const formData = new FormData(e.currentTarget);
-    
-    const { error } = await supabase.from("join_applications").insert({
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string,
-      year_of_study: formData.get("year") as string,
-      department: formData.get("department") as string,
-      why_join: formData.get("why_join") as string,
-    });
-
-    if (error) {
-      toast.error("Failed to submit application. Please try again.");
-    } else {
-      toast.success("Application submitted successfully!");
-      (e.target as HTMLFormElement).reset();
+    } catch (error) {
+      toast.error("Failed to send message. Please try again.");
     }
     setIsSubmitting(false);
   };
 
   return (
     <PageLayout>
-      <section className="pt-24 pb-16 bg-gradient-hero">
-        <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto text-center">
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-              Get in <span className="text-primary">Touch</span>
+      {/* Hero */}
+      <section className="pt-28 pb-20 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-30%,hsl(43,74%,49%,0.12),transparent_70%)]" />
+        <GlowingOrbs />
+        <FloatingParticles count={12} />
+        
+        <div className="container mx-auto px-6 lg:px-8 relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 32 }} 
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            className="max-w-3xl mx-auto text-center"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-8"
+            >
+              <motion.span
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+              </motion.span>
+              <span className="text-sm font-semibold text-primary">Get Connected</span>
+            </motion.div>
+            
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
+              Get in <GradientText>Touch</GradientText>
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl">Have questions or want to join? We'd love to hear from you!</p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
+            >
+              Have questions or want to collaborate? We'd love to hear from you.
+            </motion.p>
           </motion.div>
         </div>
       </section>
 
-      <Section>
-        <div className="grid lg:grid-cols-2 gap-12">
+      <Section variant="gradient" spacing="lg">
+        <div className="max-w-2xl mx-auto">
           {/* Contact Form */}
-          <div className="bg-card rounded-2xl border border-border p-8">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-6">Send a Message</h2>
-            <form onSubmit={handleContactSubmit} className="space-y-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            className="rounded-2xl border border-border/50 bg-gradient-to-b from-card to-card/80 p-8 md:p-10 relative overflow-hidden"
+          >
+            {/* Accent line */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+            
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+                <Mail className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-heading text-2xl font-bold text-foreground">Send a Message</h2>
+                <p className="text-muted-foreground text-sm">We'll get back to you soon</p>
+              </div>
+            </div>
+            
+            <form onSubmit={handleContactSubmit} className="space-y-5">
               <Input name="name" placeholder="Your Name" required />
               <Input name="email" type="email" placeholder="Your Email" required />
-              <Textarea name="message" placeholder="Your Message" rows={4} required />
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                <Send className="w-4 h-4 mr-2" /> {isSubmitting ? "Sending..." : "Send Message"}
+              <Textarea name="message" placeholder="Your Message" rows={5} required />
+              <Button type="submit" disabled={isSubmitting} size="lg" className="w-full group">
+                <Send className="w-4 h-4 mr-2" /> 
+                {isSubmitting ? "Sending..." : "Send Message"}
+                <ArrowRight className="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </Button>
             </form>
-          </div>
-
-          {/* Join Form */}
-          <div className="bg-card rounded-2xl border border-border p-8">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-6">Join INFO CLUB</h2>
-            <form onSubmit={handleJoinSubmit} className="space-y-4">
-              <Input name="name" placeholder="Full Name" required />
-              <Input name="email" type="email" placeholder="Email" required />
-              <Input name="phone" placeholder="Phone Number" />
-              <Input name="year" placeholder="Year of Study" />
-              <Input name="department" placeholder="Department" />
-              <Textarea name="why_join" placeholder="Why do you want to join?" rows={3} />
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </Button>
-            </form>
-          </div>
+          </motion.div>
         </div>
+        
+        {/* Contact Info */}
+        <motion.div 
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-16 grid md:grid-cols-3 gap-6"
+        >
+          {[
+            { icon: MapPin, title: "Location", info: "Department of Information Technology, College Campus" },
+            { icon: Mail, title: "Email", info: "infoclub@college.edu" },
+            { icon: Phone, title: "Phone", info: "+91 XXXXX XXXXX" },
+          ].map((item, i) => (
+            <div 
+              key={item.title}
+              className="p-6 rounded-2xl border border-border/50 bg-card/30 backdrop-blur-sm text-center hover:border-primary/30 hover:bg-card/50 transition-all duration-300"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+                <item.icon className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-heading font-bold text-foreground mb-2">{item.title}</h3>
+              <p className="text-muted-foreground text-sm">{item.info}</p>
+            </div>
+          ))}
+        </motion.div>
       </Section>
     </PageLayout>
   );

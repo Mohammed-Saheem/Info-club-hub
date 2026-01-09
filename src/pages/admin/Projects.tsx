@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { projectsAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,20 +14,20 @@ export default function AdminProjects() {
 
   const { data: projects } = useQuery({
     queryKey: ["admin-projects"],
-    queryFn: async () => { const { data } = await supabase.from("projects").select("*").order("created_at", { ascending: false }); return data || []; },
+    queryFn: () => projectsAPI.getAll(),
   });
 
   const createMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const techStack = (formData.get("tech_stack") as string).split(",").map(t => t.trim()).filter(Boolean);
-      await supabase.from("projects").insert({ title: formData.get("title") as string, description: formData.get("description") as string, tech_stack: techStack, github_url: formData.get("github_url") as string, demo_url: formData.get("demo_url") as string });
+      await projectsAPI.create({ title: formData.get("title") as string, description: formData.get("description") as string, tech_stack: techStack, github_url: formData.get("github_url") as string || undefined, demo_url: formData.get("demo_url") as string || undefined });
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-projects"] }); toast.success("Project created!"); setOpen(false); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-projects"] }); queryClient.invalidateQueries({ queryKey: ["projects"] }); toast.success("Project created!"); setOpen(false); },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await supabase.from("projects").delete().eq("id", id); },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-projects"] }); toast.success("Project deleted!"); },
+    mutationFn: async (id: string) => { await projectsAPI.delete(id); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-projects"] }); queryClient.invalidateQueries({ queryKey: ["projects"] }); toast.success("Project deleted!"); },
   });
 
   return (

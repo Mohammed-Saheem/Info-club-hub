@@ -1,0 +1,103 @@
+{
+  "profiles": [
+    {
+      "id": "31648731-c81d-4c59-8c00-81039de29ec4",
+      "user_id": "665d9d29-059e-4f27-917f-bdde1e77f0cf",
+      "email": "admin@infoclub.com",
+      "password_hash": "$2a$10$MeLKIOjiB7zzE.LhAfhOCOaDXgVNZHmOmCxYxOWMHucavxy/lS5Ty",
+      "full_name": "Admin User",
+      "is_admin": true,
+      "created_at": "2026-01-07T10:23:45.110Z",
+      "updated_at": "2026-01-07T10:23:45.111Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "da849b4a-4810-4097-828a-01edd9e71ad3",
+      "title": "AI/ML Seminar",
+      "description": "Introduction to Machine Learning and its applications",
+      "event_date": "2026-03-10",
+      "venue": "Seminar Hall",
+      "is_featured": false,
+      "created_at": "2026-01-07T10:23:45.112Z",
+      "updated_at": "2026-01-07T10:23:45.112Z"
+    },
+    {
+      "id": "b0eda3fe-4804-4f6a-a9c4-fc4deb1f8c1f",
+      "title": "Hackathon 2026",
+      "description": "24-hour coding competition with amazing prizes!",
+      "event_date": "2026-02-15",
+      "venue": "Main Auditorium",
+      "is_featured": true,
+      "created_at": "2026-01-07T10:23:45.111Z",
+      "updated_at": "2026-01-07T10:23:45.111Z"
+    },
+    {
+      "id": "bea67302-064d-4ee1-b581-e4be33e1f292",
+      "title": "Web Development Workshop",
+      "description": "Learn modern web development with React and Node.js",
+      "event_date": "2026-01-20",
+      "venue": "Computer Lab A",
+      "is_featured": true,
+      "created_at": "2026-01-07T10:23:45.111Z",
+      "updated_at": "2026-01-07T10:23:45.111Z"
+    },
+    {
+      "id": "6006cf15-a5ed-48dc-8704-e37dfd844614",
+      "title": "sdimlisidnf",
+      "description": "Kashif AIML Workshop",
+      "event_date": "2026-01-10",
+      "venue": "auditorium",
+      "banner_image": null,
+      "is_featured": false,
+      "created_at": "2026-01-08T05:08:37.257Z",
+      "updated_at": "2026-01-08T05:08:37.258Z"
+    },
+    {
+      "id": "2ca2282e-682f-4911-8d95-5eb29ae0057a",
+      "title": "Code Fiesta",
+      "description": "code swap",
+      "event_date": "2025-09-01",
+      "venue": "IT SMART ROOM",
+      "banner_image": "http://localhost:3001/uploads/8c121c8c-7d43-46aa-ac5b-733acad88969.jpg",
+      "is_featured": false,
+      "created_at": "2026-01-09T13:32:37.930Z",
+      "updated_at": "2026-01-09T13:32:37.930Z"
+    }
+  ],
+  "event_photos": [],
+  "projects": [
+    {
+      "id": "7084d773-2e74-41c7-9b67-e39f880ef775",
+      "title": "Campus Connect",
+      "description": "A mobile app connecting students across campus",
+      "tech_stack": [
+        "React Native",
+        "Node.js",
+        "MongoDB"
+      ],
+      "github_url": "https://github.com/infoclub/campus-connect",
+      "is_featured": true,
+      "created_at": "2026-01-07T10:23:45.112Z",
+      "updated_at": "2026-01-07T10:23:45.112Z"
+    },
+    {
+      "id": "bdb1382a-63dc-48ed-8b63-b5c3a848f624",
+      "title": "Study Buddy",
+      "description": "AI-powered study companion for students",
+      "tech_stack": [
+        "Python",
+        "TensorFlow",
+        "Flask"
+      ],
+      "github_url": "https://github.com/infoclub/study-buddy",
+      "is_featured": true,
+      "created_at": "2026-01-07T10:23:45.112Z",
+      "updated_at": "2026-01-07T10:23:45.112Z"
+    }
+  ],
+  "team_members": [],
+  "gallery_photos": [],
+  "contact_submissions": [],
+  "join_applications": []
+}

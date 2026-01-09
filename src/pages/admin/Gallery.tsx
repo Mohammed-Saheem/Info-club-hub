@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { galleryAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -8,12 +8,12 @@ export default function AdminGallery() {
   const queryClient = useQueryClient();
   const { data: photos } = useQuery({
     queryKey: ["admin-gallery"],
-    queryFn: async () => { const { data } = await supabase.from("gallery_photos").select("*").order("created_at", { ascending: false }); return data || []; },
+    queryFn: () => galleryAPI.getAll(),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await supabase.from("gallery_photos").delete().eq("id", id); },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-gallery"] }); toast.success("Photo deleted!"); },
+    mutationFn: async (id: string) => { await galleryAPI.delete(id); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-gallery"] }); queryClient.invalidateQueries({ queryKey: ["gallery-photos"] }); toast.success("Photo deleted!"); },
   });
 
   return (

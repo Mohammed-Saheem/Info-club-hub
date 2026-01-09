@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import { 
   Code, Database, Cloud, Smartphone, Brain, Shield, 
-  Globe, Server, Cpu, Layers
+  Globe, Server, Cpu, Layers, Sparkles, GraduationCap
 } from "lucide-react";
 import PageLayout from "@/components/layout/PageLayout";
-import { Section, SectionHeader } from "@/components/ui/section";
-import { AnimatedCard } from "@/components/ui/animated-card";
+import { Section, SectionHeader, SectionDivider } from "@/components/ui/section";
+import { AnimatedCard, FeatureCard, StatsCard } from "@/components/ui/animated-card";
 
 const technologies = [
   { icon: Code, name: "Web Development", desc: "HTML, CSS, JavaScript, React" },
@@ -22,7 +22,7 @@ const focusAreas = [
   {
     title: "Academic Excellence",
     description: "Supporting curriculum learning with practical applications and project-based learning.",
-    icon: Layers,
+    icon: GraduationCap,
   },
   {
     title: "Industry Readiness",
@@ -36,22 +36,43 @@ const focusAreas = [
   },
 ];
 
+const stats = [
+  { value: "500+", label: "Students" },
+  { value: "25+", label: "Faculty Members" },
+  { value: "10+", label: "Labs" },
+  { value: "95%", label: "Placement Rate" },
+];
+
 export default function Department() {
   return (
     <PageLayout>
       {/* Hero */}
-      <section className="pt-24 pb-16 bg-gradient-hero">
-        <div className="container mx-auto px-4">
+      <section className="pt-28 pb-20 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-30%,hsl(43,74%,49%,0.1),transparent_70%)]" />
+        
+        <div className="container mx-auto px-6 lg:px-8 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center"
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            className="max-w-4xl mx-auto text-center"
           >
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-              Department of <span className="text-primary">Information Technology</span>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-8"
+            >
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Academic Excellence</span>
+            </motion.div>
+            
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
+              Department of{" "}
+              <span className="text-gradient-gold">Information Technology</span>
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl">
+            <p className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
               Shaping future technologists with cutting-edge education and practical training.
             </p>
           </motion.div>
@@ -59,23 +80,26 @@ export default function Department() {
       </section>
 
       {/* Overview */}
-      <Section>
+      <Section variant="gradient" spacing="lg">
         <div className="max-w-4xl mx-auto">
           <SectionHeader
             title="Department Overview"
             subtitle="Excellence in IT education since establishment"
+            badge="About Us"
           />
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6 text-center"
           >
-            <p className="text-muted-foreground text-lg mb-6 text-center">
+            <p className="text-muted-foreground text-lg leading-relaxed">
               The Department of Information Technology is committed to providing quality education
               that combines theoretical foundations with practical skills. Our curriculum is designed
               to meet the evolving demands of the IT industry while fostering innovation and creativity.
             </p>
-            <p className="text-muted-foreground text-lg text-center">
+            <p className="text-muted-foreground text-lg leading-relaxed">
               With state-of-the-art laboratories, experienced faculty, and strong industry connections,
               we prepare our students to become leaders in the technology sector.
             </p>
@@ -83,65 +107,70 @@ export default function Department() {
         </div>
       </Section>
 
+      <SectionDivider />
+
       {/* Technologies */}
-      <Section className="bg-card">
+      <Section variant="dark" spacing="lg">
         <SectionHeader
           title="Technologies We Cover"
           subtitle="Stay updated with the latest in tech"
+          badge="Curriculum"
         />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
           {technologies.map((tech, i) => (
-            <AnimatedCard key={tech.name} delay={i * 0.05} className="p-4 text-center">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <tech.icon className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-display text-sm font-bold text-foreground mb-1">{tech.name}</h3>
-              <p className="text-muted-foreground text-xs">{tech.desc}</p>
-            </AnimatedCard>
-          ))}
-        </div>
-      </Section>
-
-      {/* Focus Areas */}
-      <Section>
-        <SectionHeader
-          title="Focus Areas"
-          subtitle="Our approach to holistic IT education"
-        />
-        <div className="grid md:grid-cols-3 gap-6">
-          {focusAreas.map((area, i) => (
-            <AnimatedCard key={area.title} delay={i * 0.1} className="p-8">
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                <area.icon className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="font-display text-xl font-bold text-foreground mb-3">{area.title}</h3>
-              <p className="text-muted-foreground">{area.description}</p>
-            </AnimatedCard>
-          ))}
-        </div>
-      </Section>
-
-      {/* Stats */}
-      <Section className="bg-card">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: "500+", label: "Students" },
-            { value: "25+", label: "Faculty Members" },
-            { value: "10+", label: "Labs" },
-            { value: "95%", label: "Placement Rate" },
-          ].map((stat, i) => (
             <motion.div
-              key={stat.label}
+              key={tech.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.05, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              <div className="font-display text-3xl md:text-4xl font-bold text-primary mb-2">
-                {stat.value}
+              <div className="p-5 lg:p-6 rounded-2xl border border-border/50 bg-gradient-to-b from-card to-card/80 text-center hover:border-primary/30 hover:shadow-gold-soft transition-all duration-300 group">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <tech.icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-heading text-sm lg:text-base font-bold text-foreground mb-1">{tech.name}</h3>
+                <p className="text-muted-foreground text-xs lg:text-sm">{tech.desc}</p>
               </div>
-              <div className="text-muted-foreground text-sm">{stat.label}</div>
             </motion.div>
+          ))}
+        </div>
+      </Section>
+
+      <SectionDivider variant="fade" />
+
+      {/* Focus Areas */}
+      <Section spacing="lg">
+        <SectionHeader
+          title="Focus Areas"
+          subtitle="Our approach to holistic IT education"
+          badge="Approach"
+        />
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+          {focusAreas.map((area, i) => (
+            <FeatureCard
+              key={area.title}
+              icon={area.icon}
+              title={area.title}
+              description={area.description}
+              delay={i * 0.1}
+            />
+          ))}
+        </div>
+      </Section>
+
+      <SectionDivider />
+
+      {/* Stats */}
+      <Section variant="gold" spacing="lg">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+          {stats.map((stat, i) => (
+            <StatsCard
+              key={stat.label}
+              value={stat.value}
+              label={stat.label}
+              delay={i * 0.1}
+            />
           ))}
         </div>
       </Section>

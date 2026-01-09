@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { contactAPI, applicationsAPI } from "@/lib/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 
 export default function AdminSubmissions() {
   const { data: contacts } = useQuery({
     queryKey: ["admin-contacts"],
-    queryFn: async () => { const { data } = await supabase.from("contact_submissions").select("*").order("created_at", { ascending: false }); return data || []; },
+    queryFn: () => contactAPI.getAll(),
   });
 
   const { data: applications } = useQuery({
     queryKey: ["admin-applications"],
-    queryFn: async () => { const { data } = await supabase.from("join_applications").select("*").order("created_at", { ascending: false }); return data || []; },
+    queryFn: () => applicationsAPI.getAll(),
   });
 
   return (

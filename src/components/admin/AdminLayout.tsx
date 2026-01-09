@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContextAPI";
 import { LayoutDashboard, Calendar, Code, Users, Image, Mail, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -19,11 +19,15 @@ export default function AdminLayout() {
   const location = useLocation();
 
   useEffect(() => {
-    if (!isLoading && !user) navigate("/auth");
-  }, [user, isLoading, navigate]);
+    if (!isLoading && !user) {
+      navigate("/auth");
+    } else if (!isLoading && user && !isAdmin) {
+      navigate("/");
+    }
+  }, [user, isAdmin, isLoading, navigate]);
 
   if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" /></div>;
-  if (!user) return null;
+  if (!user || !isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-background flex">

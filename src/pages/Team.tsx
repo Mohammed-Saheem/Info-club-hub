@@ -1,119 +1,165 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Linkedin, Github, Mail, Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Linkedin, Github, Mail, Users, Sparkles } from "lucide-react";
+import { teamAPI } from "@/lib/api";
 import PageLayout from "@/components/layout/PageLayout";
-import { Section, SectionHeader } from "@/components/ui/section";
-import { AnimatedCard } from "@/components/ui/animated-card";
+import { Section } from "@/components/ui/section";
+import { GlowingOrbs, FloatingParticles } from "@/components/ui/ambient-effects";
+import { GradientText } from "@/components/ui/animated-text";
 
 export default function Team() {
   const { data: members, isLoading } = useQuery({
     queryKey: ["team-members"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("team_members")
-        .select("*")
-        .order("display_order", { ascending: true });
-      
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => teamAPI.getAll(),
   });
 
   return (
     <PageLayout>
       {/* Hero */}
-      <section className="pt-24 pb-16 bg-gradient-hero">
-        <div className="container mx-auto px-4">
+      <section className="pt-28 pb-20 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-30%,hsl(43,74%,49%,0.12),transparent_70%)]" />
+        <GlowingOrbs />
+        <FloatingParticles count={12} />
+        
+        <div className="container mx-auto px-6 lg:px-8 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
             className="max-w-3xl mx-auto text-center"
           >
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-              Meet Our <span className="text-primary">Team</span>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-8"
+            >
+              <motion.span
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+              </motion.span>
+              <span className="text-sm font-semibold text-primary">The Visionaries</span>
+            </motion.div>
+            
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
+              Meet Our <GradientText>Team</GradientText>
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl">
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
+            >
               The passionate individuals driving INFO CLUB forward.
-            </p>
+            </motion.p>
           </motion.div>
         </div>
       </section>
 
-      <Section>
+      <Section variant="gradient" spacing="lg">
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden animate-pulse">
+              <div key={i} className="bg-card rounded-2xl border border-border/50 overflow-hidden animate-pulse">
                 <div className="aspect-square bg-muted" />
                 <div className="p-4 space-y-2">
-                  <div className="h-5 bg-muted rounded w-3/4" />
-                  <div className="h-4 bg-muted rounded w-1/2" />
+                  <div className="h-5 bg-muted rounded w-3/4 mx-auto" />
+                  <div className="h-4 bg-muted rounded w-1/2 mx-auto" />
                 </div>
               </div>
             ))}
           </div>
         ) : members && members.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
             {members.map((member, i) => (
-              <AnimatedCard key={member.id} delay={i * 0.05}>
-                <div className="aspect-square bg-muted overflow-hidden">
-                  {member.photo_url ? (
-                    <img
-                      src={member.photo_url}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                      <Users className="w-12 h-12 text-primary/50" />
+              <motion.div
+                key={member.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -8 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
+                className="group"
+              >
+                <div className="rounded-2xl border border-border/50 bg-gradient-to-b from-card to-card/80 overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-gold-glow">
+                  {/* Photo */}
+                  <div className="aspect-square bg-muted overflow-hidden relative">
+                    {member.photo_url ? (
+                      <img
+                        src={member.photo_url}
+                        alt={member.name}
+                        className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                        <Users className="w-12 h-12 text-primary/50 group-hover:text-primary/70 transition-colors" />
+                      </div>
+                    )}
+                    {/* Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  
+                  {/* Info */}
+                  <div className="p-5 text-center relative">
+                    {/* Top accent */}
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent group-hover:via-primary/50 transition-all duration-300" />
+                    
+                    <h3 className="font-heading text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors duration-300">
+                      {member.name}
+                    </h3>
+                    <p className="text-primary text-sm font-medium mb-4">{member.role}</p>
+                    
+                    {/* Social Links */}
+                    <div className="flex justify-center gap-2">
+                      {member.linkedin_url && (
+                        <motion.a
+                          href={member.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ scale: 1.1, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-9 h-9 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-primary hover:border-primary hover:text-primary-foreground transition-all duration-300 hover:shadow-gold-soft"
+                        >
+                          <Linkedin className="w-4 h-4" />
+                        </motion.a>
+                      )}
+                      {member.github_url && (
+                        <motion.a
+                          href={member.github_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ scale: 1.1, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-9 h-9 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-primary hover:border-primary hover:text-primary-foreground transition-all duration-300 hover:shadow-gold-soft"
+                        >
+                          <Github className="w-4 h-4" />
+                        </motion.a>
+                      )}
+                      {member.email && (
+                        <motion.a
+                          href={`mailto:${member.email}`}
+                          whileHover={{ scale: 1.1, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-9 h-9 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-primary hover:border-primary hover:text-primary-foreground transition-all duration-300 hover:shadow-gold-soft"
+                        >
+                          <Mail className="w-4 h-4" />
+                        </motion.a>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="p-4 text-center">
-                  <h3 className="font-display text-lg font-bold text-foreground mb-1">
-                    {member.name}
-                  </h3>
-                  <p className="text-primary text-sm font-medium mb-3">{member.role}</p>
-                  <div className="flex justify-center gap-2">
-                    {member.linkedin_url && (
-                      <a
-                        href={member.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
-                      >
-                        <Linkedin className="w-4 h-4" />
-                      </a>
-                    )}
-                    {member.github_url && (
-                      <a
-                        href={member.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
-                      >
-                        <Github className="w-4 h-4" />
-                      </a>
-                    )}
-                    {member.email && (
-                      <a
-                        href={`mailto:${member.email}`}
-                        className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
-                      >
-                        <Mail className="w-4 h-4" />
-                      </a>
-                    )}
                   </div>
                 </div>
-              </AnimatedCard>
+              </motion.div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <Users className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-            <h3 className="font-display text-xl font-bold text-foreground mb-2">
+          <div className="text-center py-20">
+            <div className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
+              <Users className="w-10 h-10 text-primary/50" />
+            </div>
+            <h3 className="font-heading text-xl font-bold text-foreground mb-3">
               Team information coming soon
             </h3>
             <p className="text-muted-foreground">
