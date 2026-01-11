@@ -10,7 +10,6 @@ const navLinks = [
   { href: "/about", label: "About" },
   { href: "/department", label: "Department" },
   { href: "/events", label: "Events" },
-  { href: "/projects", label: "Projects" },
   { href: "/team", label: "Team" },
   { href: "/gallery", label: "Gallery" },
   { href: "/contact", label: "Contact" },
@@ -82,19 +81,8 @@ export default function Navbar() {
               >
                 <Link
                   to={link.href}
-                  className="relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 group block"
+                  className="relative px-4 py-2 text-sm font-medium transition-all duration-300 group block"
                 >
-                  {/* Background on hover/active */}
-                  <motion.span 
-                    className={`absolute inset-0 rounded-xl transition-all duration-300 ${
-                      location.pathname === link.href
-                        ? "bg-primary/10 border border-primary/20"
-                        : "bg-transparent group-hover:bg-muted/50"
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                  
                   {/* Text */}
                   <span className={`relative z-10 transition-colors duration-300 ${
                     location.pathname === link.href
@@ -104,19 +92,14 @@ export default function Navbar() {
                     {link.label}
                   </span>
                   
-                  {/* Active indicator line */}
-                  {location.pathname === link.href && (
-                    <motion.span 
-                      layoutId="navbar-indicator"
-                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50 rounded-full"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                  
-                  {/* Hover glow effect */}
-                  <motion.span
-                    className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-300"
-                    initial={false}
+                  {/* Underline indicator - shows on hover and when active */}
+                  <motion.span 
+                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all duration-300 ${
+                      location.pathname === link.href
+                        ? "w-full bg-gradient-to-r from-primary/50 via-primary to-primary/50"
+                        : "w-0 bg-primary group-hover:w-full"
+                    }`}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 </Link>
               </motion.div>
