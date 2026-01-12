@@ -57,8 +57,12 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
         <div className="absolute inset-0 bg-primary/30 rounded-3xl blur-3xl animate-glow-pulse" />
         
         {/* Logo */}
-        <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-primary via-gold-light to-gold-dark shadow-gold-intense flex items-center justify-center">
-          <span className="font-heading font-bold text-primary-foreground text-4xl">IC</span>
+        <div className="relative w-24 h-24 rounded-3xl shadow-gold-intense overflow-hidden">
+          <img 
+            src="/INFOCLUB[1].jpg" 
+            alt="INFO CLUB Logo" 
+            className="w-full h-full object-cover"
+          />
         </div>
         
         {/* Loading bar */}
