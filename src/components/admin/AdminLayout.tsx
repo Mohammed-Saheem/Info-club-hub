@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContextAPI";
-import { LayoutDashboard, Calendar, Code, Users, Image, Mail, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, Calendar, Code, Users, Image, Mail, LogOut, Home, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/admin/team", icon: Users, label: "Team" },
   { href: "/admin/gallery", icon: Image, label: "Gallery" },
   { href: "/admin/submissions", icon: Mail, label: "Submissions" },
+  { href: "/admin/users", icon: UserCog, label: "Users" },
 ];
 
 export default function AdminLayout() {
@@ -33,9 +34,11 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-background flex">
       <aside className="w-64 bg-card border-r border-border p-4 flex flex-col">
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-            <span className="font-display font-bold text-primary-foreground">IC</span>
-          </div>
+          <img 
+            src="/INFOCLUB[1].jpg" 
+            alt="INFO CLUB Logo" 
+            className="w-10 h-10 rounded-lg object-cover"
+          />
           <span className="font-display font-bold text-lg">Admin</span>
         </div>
         <nav className="flex-1 space-y-1">

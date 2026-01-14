@@ -1,278 +1,570 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
-// Token storage
-const getToken = () => localStorage.getItem('auth_token');
-const setToken = (token: string) => localStorage.setItem('auth_token', token);
-const removeToken = () => localStorage.removeItem('auth_token');
+type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
+type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
 
-// Fetch wrapper with auth
-async function fetchAPI<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getToken();
-  
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  
-  if (token) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error?.message || 'An error occurred');
-  }
-
-  return data;
+// Helper function to handle Supabase errors
+function handleError(error: any): never {
+  throw new Error(error?.message || 'An error occurred');
 }
-
-// Auth API
-export const authAPI = {
-  signUp: async (email: string, password: string, fullName?: string) => {
-    const data = await fetchAPI<{ user: User; token: string }>('/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, fullName }),
-    });
-    setToken(data.token);
-    return data;
-  },
-
-  signIn: async (email: string, password: string) => {
-    const data = await fetchAPI<{ user: User; token: string }>('/auth/signin', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    setToken(data.token);
-    return data;
-  },
-
-  signOut: () => {
-    removeToken();
-  },
-
-  getMe: () => fetchAPI<{ user: User }>('/auth/me'),
-
-  updateProfile: (data: { fullName?: string; avatarUrl?: string }) =>
-    fetchAPI<{ user: User }>('/auth/profile', {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
-
-  changePassword: (currentPassword: string, newPassword: string) =>
-    fetchAPI('/auth/change-password', {
-      method: 'POST',
-      body: JSON.stringify({ currentPassword, newPassword }),
-    }),
-
-  isAuthenticated: () => !!getToken(),
-};
 
 // Events API
 export const eventsAPI = {
-  getAll: (params?: { featured?: boolean; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.featured) query.set('featured', 'true');
-    if (params?.limit) query.set('limit', params.limit.toString());
-    return fetchAPI<Event[]>(`/events?${query}`);
+  getAll: async (params?: { featured?: boolean; limit?: number }) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    let query = supabase
+      .from("events")
+      .select("*")
+      .order("event_date", { ascending: false });
+
+    if (params?.featured) {
+      query = query.eq("is_featured", true);
+    }
+
+    if (params?.limit) {
+      query = query.limit(params.limit);
+    }
+
+    const { data, error } = await query;
+    if (error) handleError(error);
+    return data || [];
   },
 
-  getOne: (id: string) => fetchAPI<Event>(`/events/${id}`),
+  getOne: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) handleError(error);
+    return data;
+  },
 
-  create: (data: CreateEventData) =>
-    fetchAPI<Event>('/events', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+  create: async (data: CreateEventData) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("events")
+      .insert(data)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  update: (id: string, data: Partial<CreateEventData>) =>
-    fetchAPI<Event>(`/events/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+  update: async (id: string, data: Partial<CreateEventData>) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("events")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  delete: (id: string) =>
-    fetchAPI(`/events/${id}`, { method: 'DELETE' }),
+  delete: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase
+      .from("events")
+      .delete()
+      .eq("id", id);
+    if (error) handleError(error);
+  },
 
-  getPhotos: (eventId: string) => fetchAPI<EventPhoto[]>(`/events/${eventId}/photos`),
+  getPhotos: async (eventId: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data, error } = await supabase
+      .from("event_photos")
+      .select("*")
+      .eq("event_id", eventId)
+      .order("created_at", { ascending: false });
+    if (error) handleError(error);
+    return data || [];
+  },
 
-  addPhoto: (eventId: string, data: { image_url: string; caption?: string }) =>
-    fetchAPI<EventPhoto>(`/events/${eventId}/photos`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+  addPhoto: async (eventId: string, data: { image_url: string; caption?: string }) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("event_photos")
+      .insert({ ...data, event_id: eventId })
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  deletePhoto: (photoId: string) =>
-    fetchAPI(`/events/photos/${photoId}`, { method: 'DELETE' }),
+  deletePhoto: async (photoId: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase
+      .from("event_photos")
+      .delete()
+      .eq("id", photoId);
+    if (error) handleError(error);
+  },
 };
 
 // Projects API
 export const projectsAPI = {
-  getAll: (params?: { featured?: boolean; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.featured) query.set('featured', 'true');
-    if (params?.limit) query.set('limit', params.limit.toString());
-    return fetchAPI<Project[]>(`/projects?${query}`);
+  getAll: async (params?: { featured?: boolean; limit?: number }) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    let query = supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (params?.featured) {
+      query = query.eq("is_featured", true);
+    }
+
+    if (params?.limit) {
+      query = query.limit(params.limit);
+    }
+
+    const { data, error } = await query;
+    if (error) handleError(error);
+    return data || [];
   },
 
-  getOne: (id: string) => fetchAPI<Project>(`/projects/${id}`),
+  getOne: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) handleError(error);
+    return data;
+  },
 
-  create: (data: CreateProjectData) =>
-    fetchAPI<Project>('/projects', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+  create: async (data: CreateProjectData) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("projects")
+      .insert(data)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  update: (id: string, data: Partial<CreateProjectData>) =>
-    fetchAPI<Project>(`/projects/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+  update: async (id: string, data: Partial<CreateProjectData>) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("projects")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  delete: (id: string) =>
-    fetchAPI(`/projects/${id}`, { method: 'DELETE' }),
+  delete: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", id);
+    if (error) handleError(error);
+  },
 };
 
 // Team API
 export const teamAPI = {
-  getAll: () => fetchAPI<TeamMember[]>('/team'),
+  getAll: async () => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("*")
+      .order("display_order", { ascending: true });
+    if (error) handleError(error);
+    return data || [];
+  },
 
-  getOne: (id: string) => fetchAPI<TeamMember>(`/team/${id}`),
+  getOne: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) handleError(error);
+    return data;
+  },
 
-  create: (data: CreateTeamMemberData) =>
-    fetchAPI<TeamMember>('/team', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+  create: async (data: CreateTeamMemberData) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    // Get current max display_order
+    const { data: members } = await supabase
+      .from("team_members")
+      .select("display_order")
+      .order("display_order", { ascending: false })
+      .limit(1);
+    
+    const displayOrder = members && members.length > 0 
+      ? (members[0].display_order || 0) + 1 
+      : 0;
 
-  update: (id: string, data: Partial<CreateTeamMemberData>) =>
-    fetchAPI<TeamMember>(`/team/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+    const { data: result, error } = await supabase
+      .from("team_members")
+      .insert({ ...data, display_order: displayOrder })
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  delete: (id: string) =>
-    fetchAPI(`/team/${id}`, { method: 'DELETE' }),
+  update: async (id: string, data: Partial<CreateTeamMemberData>) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("team_members")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  reorder: (orders: { id: string; display_order: number }[]) =>
-    fetchAPI<TeamMember[]>('/team/reorder', {
-      method: 'POST',
-      body: JSON.stringify({ orders }),
-    }),
+  delete: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase
+      .from("team_members")
+      .delete()
+      .eq("id", id);
+    if (error) handleError(error);
+  },
+
+  reorder: async (orders: { id: string; display_order: number }[]) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    // Update each member's display_order
+    const updates = orders.map(order =>
+      supabase
+        .from("team_members")
+        .update({ display_order: order.display_order })
+        .eq("id", order.id)
+    );
+    await Promise.all(updates);
+    return teamAPI.getAll();
+  },
 };
 
 // Gallery API
 export const galleryAPI = {
-  getAll: (params?: { category?: string; event_id?: string; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.category) query.set('category', params.category);
-    if (params?.event_id) query.set('event_id', params.event_id);
-    if (params?.limit) query.set('limit', params.limit.toString());
-    return fetchAPI<GalleryPhoto[]>(`/gallery?${query}`);
+  getAll: async (params?: { category?: string; event_id?: string; limit?: number }) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    let query = supabase
+      .from("gallery_photos")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (params?.category) {
+      query = query.eq("category", params.category);
+    }
+
+    if (params?.event_id) {
+      query = query.eq("event_id", params.event_id);
+    }
+
+    if (params?.limit) {
+      query = query.limit(params.limit);
+    }
+
+    const { data, error } = await query;
+    if (error) handleError(error);
+    return data || [];
   },
 
-  getCategories: () => fetchAPI<string[]>('/gallery/categories'),
+  getCategories: async () => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data, error } = await supabase
+      .from("gallery_photos")
+      .select("category");
+    if (error) handleError(error);
+    const categories = new Set((data || []).map(p => p.category).filter(Boolean));
+    return Array.from(categories) as string[];
+  },
 
-  create: (data: CreateGalleryPhotoData) =>
-    fetchAPI<GalleryPhoto>('/gallery', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+  create: async (data: CreateGalleryPhotoData) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("gallery_photos")
+      .insert(data)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  update: (id: string, data: Partial<CreateGalleryPhotoData>) =>
-    fetchAPI<GalleryPhoto>(`/gallery/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+  update: async (id: string, data: Partial<CreateGalleryPhotoData>) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("gallery_photos")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
 
-  delete: (id: string) =>
-    fetchAPI(`/gallery/${id}`, { method: 'DELETE' }),
+  delete: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase
+      .from("gallery_photos")
+      .delete()
+      .eq("id", id);
+    if (error) handleError(error);
+  },
 };
 
 // Contact API
 export const contactAPI = {
-  submit: (data: { name: string; email: string; message: string }) =>
-    fetchAPI('/contact', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-
-  getAll: (params?: { is_read?: boolean }) => {
-    const query = new URLSearchParams();
-    if (params?.is_read !== undefined) query.set('is_read', params.is_read.toString());
-    return fetchAPI<ContactSubmission[]>(`/contact?${query}`);
+  submit: async (data: { name: string; email: string; message: string }) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("contact_submissions")
+      .insert({ ...data, is_read: false })
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
   },
 
-  markRead: (id: string, is_read: boolean) =>
-    fetchAPI<ContactSubmission>(`/contact/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ is_read }),
-    }),
+  getAll: async (params?: { is_read?: boolean }) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    let query = supabase
+      .from("contact_submissions")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  delete: (id: string) =>
-    fetchAPI(`/contact/${id}`, { method: 'DELETE' }),
+    if (params?.is_read !== undefined) {
+      query = query.eq("is_read", params.is_read);
+    }
+
+    const { data, error } = await query;
+    if (error) handleError(error);
+    return data || [];
+  },
+
+  markRead: async (id: string, is_read: boolean) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("contact_submissions")
+      .update({ is_read })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
+
+  delete: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase
+      .from("contact_submissions")
+      .delete()
+      .eq("id", id);
+    if (error) handleError(error);
+  },
 };
 
 // Applications API
 export const applicationsAPI = {
-  submit: (data: CreateApplicationData) =>
-    fetchAPI('/applications', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-
-  getAll: (params?: { is_reviewed?: boolean }) => {
-    const query = new URLSearchParams();
-    if (params?.is_reviewed !== undefined) query.set('is_reviewed', params.is_reviewed.toString());
-    return fetchAPI<JoinApplication[]>(`/applications?${query}`);
+  submit: async (data: CreateApplicationData) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("join_applications")
+      .insert({ ...data, is_reviewed: false })
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
   },
 
-  markReviewed: (id: string, is_reviewed: boolean) =>
-    fetchAPI<JoinApplication>(`/applications/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ is_reviewed }),
-    }),
+  getAll: async (params?: { is_reviewed?: boolean }) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    let query = supabase
+      .from("join_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  delete: (id: string) =>
-    fetchAPI(`/applications/${id}`, { method: 'DELETE' }),
+    if (params?.is_reviewed !== undefined) {
+      query = query.eq("is_reviewed", params.is_reviewed);
+    }
+
+    const { data, error } = await query;
+    if (error) handleError(error);
+    return data || [];
+  },
+
+  markReviewed: async (id: string, is_reviewed: boolean) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("join_applications")
+      .update({ is_reviewed })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
+
+  delete: async (id: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase
+      .from("join_applications")
+      .delete()
+      .eq("id", id);
+    if (error) handleError(error);
+  },
 };
+
+// Users API (Admin only)
+export const usersAPI = {
+  getAll: async () => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) handleError(error);
+    return data || [];
+  },
+
+  create: async (data: { email: string; password: string; fullName?: string; isAdmin?: boolean }) => {
+    // Call backend API endpoint for user creation
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+    const response = await fetch(`${backendUrl}/api/auth/admin/create-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await getAuthToken()}`
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Failed to create user');
+    }
+
+    return await response.json();
+  },
+
+  update: async (userId: string, data: Partial<{ full_name: string; is_admin: boolean }>) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { data: result, error } = await supabase
+      .from("profiles")
+      .update(data)
+      .eq("user_id", userId)
+      .select()
+      .single();
+    if (error) handleError(error);
+    return result;
+  },
+
+  delete: async (userId: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    // Note: Deleting from profiles will cascade delete auth user if foreign key is set up
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("user_id", userId);
+    if (error) handleError(error);
+  },
+};
+
+// Helper function to get auth token
+async function getAuthToken(): Promise<string | null> {
+  if (!supabase) return null;
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
 
 // Stats API
 export const statsAPI = {
-  getAdminStats: () => fetchAPI<AdminStats>('/stats'),
-  getPublicStats: () => fetchAPI<PublicStats>('/stats/public'),
-};
+  getAdminStats: async () => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    const [events, projects, team, gallery, contacts, applications] = await Promise.all([
+      supabase.from("events").select("*", { count: "exact", head: true }),
+      supabase.from("projects").select("*", { count: "exact", head: true }),
+      supabase.from("team_members").select("*", { count: "exact", head: true }),
+      supabase.from("gallery_photos").select("*", { count: "exact", head: true }),
+      supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("is_read", false),
+      supabase.from("join_applications").select("*", { count: "exact", head: true }).eq("is_reviewed", false),
+    ]);
 
-// Upload API
-export const uploadAPI = {
-  uploadImage: async (file: File): Promise<{ url: string; filename: string }> => {
-    const token = getToken();
-    const formData = new FormData();
-    formData.append('image', file);
-
-    const response = await fetch(`${API_BASE_URL}/upload`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'Upload failed');
-    return data;
+    return {
+      events: events.count || 0,
+      projects: projects.count || 0,
+      team: team.count || 0,
+      gallery: gallery.count || 0,
+      unread_contacts: contacts.count || 0,
+      pending_applications: applications.count || 0,
+    };
   },
 
-  deleteImage: (filename: string) =>
-    fetchAPI(`/upload/${filename}`, { method: 'DELETE' }),
+  getPublicStats: async () => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    const [events, projects, team] = await Promise.all([
+      supabase.from("events").select("*", { count: "exact", head: true }),
+      supabase.from("projects").select("*", { count: "exact", head: true }),
+      supabase.from("team_members").select("*", { count: "exact", head: true }),
+    ]);
+
+    return {
+      events: events.count || 0,
+      projects: projects.count || 0,
+      members: team.count || 0,
+    };
+  },
+};
+
+// Upload API - Using Supabase Storage
+export const uploadAPI = {
+  uploadImage: async (file: File): Promise<{ url: string; filename: string }> => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+    const filePath = `uploads/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) handleError(error);
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('images')
+      .getPublicUrl(filePath);
+
+    return { url: publicUrl, filename: fileName };
+  },
+
+  deleteImage: async (filename: string) => {
+    if (!supabase) throw new Error("Supabase is not configured");
+    const { error } = await supabase.storage
+      .from('images')
+      .remove([`uploads/${filename}`]);
+    if (error) handleError(error);
+  },
 };
 
 // Types
@@ -285,130 +577,23 @@ export interface User {
   avatar_url: string | null;
 }
 
-export interface Event {
-  id: string;
-  title: string;
-  description: string | null;
-  event_date: string;
-  venue: string | null;
-  banner_image: string | null;
-  is_featured: boolean;
-  created_at: string;
-  updated_at: string;
-}
+export type Event = Tables<'events'>;
+export type CreateEventData = TablesInsert<'events'>;
+export type EventPhoto = Tables<'event_photos'>;
 
-export interface CreateEventData {
-  title: string;
-  description?: string;
-  event_date: string;
-  venue?: string;
-  banner_image?: string;
-  is_featured?: boolean;
-}
+export type Project = Tables<'projects'>;
+export type CreateProjectData = TablesInsert<'projects'>;
 
-export interface EventPhoto {
-  id: string;
-  event_id: string;
-  image_url: string;
-  caption: string | null;
-  created_at: string;
-}
+export type TeamMember = Tables<'team_members'>;
+export type CreateTeamMemberData = Omit<TablesInsert<'team_members'>, 'display_order'>;
 
-export interface Project {
-  id: string;
-  title: string;
-  description: string | null;
-  tech_stack: string[];
-  github_url: string | null;
-  demo_url: string | null;
-  image_url: string | null;
-  is_featured: boolean;
-  created_at: string;
-  updated_at: string;
-}
+export type GalleryPhoto = Tables<'gallery_photos'>;
+export type CreateGalleryPhotoData = TablesInsert<'gallery_photos'>;
 
-export interface CreateProjectData {
-  title: string;
-  description?: string;
-  tech_stack?: string[];
-  github_url?: string;
-  demo_url?: string;
-  image_url?: string;
-  is_featured?: boolean;
-}
+export type ContactSubmission = Tables<'contact_submissions'>;
 
-export interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  bio: string | null;
-  photo_url: string | null;
-  linkedin_url: string | null;
-  github_url: string | null;
-  email: string | null;
-  display_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateTeamMemberData {
-  name: string;
-  role: string;
-  bio?: string;
-  photo_url?: string;
-  linkedin_url?: string;
-  github_url?: string;
-  email?: string;
-  display_order?: number;
-}
-
-export interface GalleryPhoto {
-  id: string;
-  title: string | null;
-  image_url: string;
-  category: string | null;
-  event_id: string | null;
-  created_at: string;
-}
-
-export interface CreateGalleryPhotoData {
-  image_url: string;
-  title?: string;
-  category?: string;
-  event_id?: string;
-}
-
-export interface ContactSubmission {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  is_read: boolean;
-  created_at: string;
-}
-
-export interface JoinApplication {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  year_of_study: string | null;
-  department: string | null;
-  why_join: string | null;
-  skills: string | null;
-  is_reviewed: boolean;
-  created_at: string;
-}
-
-export interface CreateApplicationData {
-  name: string;
-  email: string;
-  phone?: string;
-  year_of_study?: string;
-  department?: string;
-  why_join?: string;
-  skills?: string;
-}
+export type JoinApplication = Tables<'join_applications'>;
+export type CreateApplicationData = Omit<TablesInsert<'join_applications'>, 'is_reviewed'>;
 
 export interface AdminStats {
   events: number;
@@ -424,3 +609,5 @@ export interface PublicStats {
   projects: number;
   members: number;
 }
+
+export type UserProfile = Tables<'profiles'>;
