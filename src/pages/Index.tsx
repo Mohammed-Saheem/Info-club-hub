@@ -63,20 +63,11 @@ export default function Index() {
           <FloatingParticles count={15} />
         </div>
         
-        <div className="container mx-auto px-6 lg:px-8 relative z-10">
+        <div className="container mx-auto px-6 lg:px-8 relative z-10 pt-20 lg:pt-32">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             {/* Left Content */}
             <div className="max-w-2xl">
               {/* Premium Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-                className="mb-10"
-              >
-                <LiveBadge>Elite Tech Community</LiveBadge>
-              </motion.div>
-
               {/* Main Headline */}
               <motion.h1
                 initial={{ opacity: 0, y: 32 }}
@@ -84,17 +75,7 @@ export default function Index() {
                 transition={{ duration: 0.7, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
                 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05] tracking-tight mb-8"
               >
-                Where{" "}
-                <GradientText>Innovation</GradientText>
-                <br />
-                <motion.span 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="text-muted-foreground/80"
-                >
-                  Meets Excellence
-                </motion.span>
+                Welcome to INFO CLUB
               </motion.h1>
 
               {/* Description */}
@@ -213,8 +194,15 @@ export default function Index() {
                 
                 {/* Golden IC Square Centerpiece - The Heart of Infoclub */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-64 h-64">
-                    <GoldenICSquare />
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/40 rounded-3xl blur-2xl animate-glow-pulse" />
+                    <div className="relative w-28 h-28 rounded-3xl shadow-gold-intense overflow-hidden">
+                      <img 
+                        src="/INFOCLUB[1].jpg" 
+                        alt="INFO CLUB Logo" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
