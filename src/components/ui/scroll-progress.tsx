@@ -8,18 +8,11 @@ export function ScrollProgress() {
     restDelta: 0.001,
   });
 
+  // Minimal, elegant scroll indicator - only visible at the very edge
   return (
-    <>
-      {/* Progress bar at top */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-gold-light to-primary origin-left z-[100]"
-        style={{ scaleX }}
-      />
-      {/* Glow effect */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-[6px] bg-gradient-to-r from-primary/50 via-gold-light/50 to-primary/50 blur-sm origin-left z-[99]"
-        style={{ scaleX }}
-      />
-    </>
+    <motion.div
+      className="fixed bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent origin-left z-[100]"
+      style={{ scaleX, opacity: scaleX }}
+    />
   );
 }

@@ -13,6 +13,7 @@ const contactRoutes = require('./routes/contact');
 const applicationsRoutes = require('./routes/applications');
 const statsRoutes = require('./routes/stats');
 const uploadRoutes = require('./routes/upload');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -68,6 +69,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/applications', applicationsRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -103,5 +105,7 @@ app.listen(PORT, () => {
   console.log('   GET  /api/team       - List team members');
   console.log('   GET  /api/gallery    - List gallery photos');
   console.log('   GET  /api/stats/public - Public stats');
+  console.log('   GET  /api/admin/users - List users (admin)');
+  console.log('   POST /api/admin/users - Create user (admin)');
   console.log('========================================\n');
 });

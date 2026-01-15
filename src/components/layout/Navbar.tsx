@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContextAPI";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -35,9 +35,9 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
         isScrolled 
-          ? "bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-lg shadow-black/10" 
+          ? "bg-background/70 backdrop-blur-2xl border-b border-border/20 shadow-[0_4px_30px_rgba(0,0,0,0.15)]" 
           : "bg-transparent"
       }`}
     >

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { GlowingOrbs, FloatingParticles } from "@/components/ui/ambient-effects";
 import { GradientText } from "@/components/ui/animated-text";
 import { LiveBadge } from "@/components/ui/badge";
+import { GoldenICSquare } from "@/components/ui/golden-ic-square";
 
 const fadeUp = {
   initial: { opacity: 0, y: 32 },
@@ -152,7 +153,7 @@ export default function Index() {
               </motion.div>
             </div>
 
-            {/* Right - Premium Abstract Illustration */}
+            {/* Right - Premium 3D Flame Centerpiece */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -210,13 +211,10 @@ export default function Index() {
                   <Trophy className="w-6 h-6 text-primary" />
                 </motion.div>
                 
-                {/* Center logo */}
+                {/* Golden IC Square Centerpiece - The Heart of Infoclub */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-primary/40 rounded-3xl blur-2xl animate-glow-pulse" />
-                    <div className="relative w-28 h-28 rounded-3xl bg-gradient-to-br from-primary via-gold-light to-gold-dark shadow-gold-intense flex items-center justify-center">
-                      <span className="font-heading font-bold text-primary-foreground text-5xl">IC</span>
-                    </div>
+                  <div className="w-64 h-64">
+                    <GoldenICSquare />
                   </div>
                 </div>
               </div>
