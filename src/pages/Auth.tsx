@@ -45,7 +45,7 @@ export default function Auth() {
           setIsSubmitting(false);
         }
       }, 500); // Small delay to allow profile fetch
-      
+
       return () => clearTimeout(timer);
     }
   }, [loginSuccess, user, profile, isAdmin, authLoading, navigate]);
@@ -59,7 +59,7 @@ export default function Auth() {
         setLoginSuccess(false);
         setIsSubmitting(false);
       }, 10000); // 10 second timeout
-      
+
       return () => clearTimeout(timeout);
     }
   }, [loginSuccess, isSubmitting]);
@@ -71,7 +71,7 @@ export default function Auth() {
     if (isLogin) {
       console.log("Attempting sign in for:", email);
       const { error } = await signIn(email, password);
-      
+
       if (error) {
         console.error("Sign in error:", error);
         toast.error(error.message || "Login failed. Please try again.");
@@ -121,8 +121,12 @@ export default function Auth() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <div className="bg-card rounded-2xl border border-border p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-xl bg-primary mx-auto mb-4 flex items-center justify-center">
-              <span className="font-display font-bold text-primary-foreground text-2xl">IC</span>
+            <div className="w-20 h-20 mx-auto mb-4 overflow-hidden rounded-xl">
+              <img
+                src="/INFOCLUB[1].jpg"
+                alt="INFO CLUB Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="font-display text-2xl font-bold text-foreground">{isLogin ? "Welcome Back" : "Create Account"}</h1>
             <p className="text-muted-foreground text-sm mt-2">Admin access only</p>
