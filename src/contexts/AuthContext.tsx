@@ -17,6 +17,7 @@ interface AuthContextType {
   profile: Profile | null;
   isAdmin: boolean;
   isLoading: boolean;
+  profileFetched: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -29,56 +30,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileFetched, setProfileFetched] = useState(false);
 
   useEffect(() => {
     // If Supabase is not configured, skip auth setup
     if (!supabase) {
       console.warn("Supabase client is not configured");
       setIsLoading(false);
+      setProfileFetched(true);
       return;
     }
+
+    let initialSessionHandled = false;
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.email);
+        
+        // Skip if this is the initial session - we handle that separately
+        if (event === 'INITIAL_SESSION') {
+          console.log("Skipping INITIAL_SESSION in listener - handled by getSession");
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         // Fetch profile when user changes
         if (session?.user) {
-          // Use setTimeout to avoid potential Supabase deadlock
-          setTimeout(() => {
-            fetchProfile(session.user.id);
+          // IMPORTANT: Reset profileFetched before fetching new profile
+          setProfileFetched(false);
+          setProfile(null);
+          // Use setTimeout to avoid blocking auth state update
+          setTimeout(async () => {
+            await fetchProfile(session.user.id);
           }, 0);
         } else {
           setProfile(null);
+          setProfileFetched(true);
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log("Initial session check:", session?.user?.email || "No session");
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchProfile(session.user.id);
+    const initSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Initial session check:", session?.user?.email || "No session");
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        } else {
+          setProfileFetched(true);
+        }
+      } catch (err) {
+        console.error("Error getting session:", err);
+        setProfileFetched(true);
+      } finally {
+        initialSessionHandled = true;
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    };
+    
+    initSession();
 
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchProfile = async (userId: string) => {
-    if (!supabase) return;
+    if (!supabase) {
+      console.warn("Supabase not configured, skipping profile fetch");
+      setProfileFetched(true);
+      return;
+    }
     
-    setProfileLoading(true);
     console.log("Fetching profile for user:", userId);
     
     try {
+      // Get the current user email
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const userEmail = currentUser?.email || '';
+
+      // First, attempt to fetch the profile
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -87,21 +123,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error("Error fetching profile:", error.message, error.details, error.hint);
-        // Check if it's an RLS error
-        if (error.message.includes("RLS") || error.code === "PGRST301") {
-          console.error("This might be a Row Level Security issue. Check RLS policies on profiles table.");
+        console.error("Error code:", error.code);
+        
+        // If there's an error, try to create the profile anyway
+        console.warn("Attempting to create profile after fetch error...");
+        const { data: createdProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: userId,
+            email: userEmail,
+            full_name: currentUser?.user_metadata?.full_name || null,
+            is_admin: false
+          })
+          .select()
+          .maybeSingle();
+        
+        if (createError) {
+          console.error("Failed to create profile:", createError);
+          // Even if creation fails, mark as fetched to unblock the UI
+          // The user might still be able to use the app
+        } else if (createdProfile) {
+          console.log("✅ Profile created:", createdProfile);
+          setProfile(createdProfile as Profile);
         }
       } else if (data) {
-        console.log("Profile fetched successfully:", data);
+        console.log("✅ Profile fetched successfully:", data);
         setProfile(data as Profile);
       } else {
-        console.warn("No profile found for user:", userId);
-        console.warn("You need to create a profile row in the profiles table for this user.");
+        console.warn("No profile found for user, attempting to create one...");
+        const { data: createdProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: userId,
+            email: userEmail,
+            full_name: currentUser?.user_metadata?.full_name || null,
+            is_admin: false
+          })
+          .select()
+          .maybeSingle();
+        
+        if (createError) {
+          console.error("Failed to create profile:", createError);
+        } else if (createdProfile) {
+          console.log("✅ Profile created:", createdProfile);
+          setProfile(createdProfile as Profile);
+        }
       }
     } catch (err) {
-      console.error("Unexpected error fetching profile:", err);
+      console.error("Unexpected error fetching/creating profile:", err);
     } finally {
-      setProfileLoading(false);
+      setProfileFetched(true);
     }
   };
 
@@ -143,7 +214,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
     }
     setProfile(null);
+    setProfileFetched(false);
   };
+
+  // isLoading should be true until BOTH auth check AND profile fetch are complete
+  const actuallyLoading = isLoading || (user && !profileFetched);
 
   return (
     <AuthContext.Provider
@@ -152,7 +227,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         isAdmin: profile?.is_admin ?? false,
-        isLoading,
+        isLoading: actuallyLoading,
+        profileFetched,
         signIn,
         signUp,
         signOut,

@@ -13,42 +13,53 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
-  const { user, profile, isAdmin, isLoading: authLoading, signIn, signUp } = useAuth();
+  const { user, profile, isAdmin, isLoading: authLoading, profileFetched, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
   // Debug logging
   useEffect(() => {
-    console.log("Auth state:", { user: !!user, profile, isAdmin, authLoading, loginSuccess });
-  }, [user, profile, isAdmin, authLoading, loginSuccess]);
+    console.log("=== AUTH PAGE STATE ===");
+    console.log("user:", user ? user.email : null);
+    console.log("profile:", profile);
+    console.log("isAdmin:", isAdmin);
+    console.log("authLoading:", authLoading);
+    console.log("profileFetched:", profileFetched);
+    console.log("loginSuccess:", loginSuccess);
+    console.log("========================");
+  }, [user, profile, isAdmin, authLoading, profileFetched, loginSuccess]);
 
   // Handle redirect after successful login
   useEffect(() => {
-    // Wait for login success AND user to be set AND auth loading to complete
-    if (loginSuccess && user && !authLoading) {
-      // Give a small delay for profile to be fetched
-      const timer = setTimeout(() => {
-        if (profile) {
-          if (isAdmin) {
-            console.log("Redirecting to admin...");
-            navigate("/admin", { replace: true });
-          } else {
-            toast.error("You don't have admin access");
-            setLoginSuccess(false);
-            setIsSubmitting(false);
-            navigate("/", { replace: true });
-          }
+    // Wait for login success AND user to be set AND auth loading to complete AND profile fetched
+    if (loginSuccess && user && !authLoading && profileFetched) {
+      console.log("=== LOGIN SUCCESS - CHECKING REDIRECT ===");
+      console.log("profile:", profile);
+      console.log("isAdmin:", isAdmin);
+      
+      if (profile) {
+        if (isAdmin) {
+          console.log("✅ Redirecting to admin...");
+          navigate("/admin", { replace: true });
         } else {
-          // Profile not found - likely missing from database
-          console.error("No profile found for user. Check if profile exists in database.");
-          toast.error("Profile not found. Please contact administrator.");
+          console.log("❌ User is not admin, redirecting to home");
+          toast.error("You don't have admin access. Contact administrator to get admin privileges.");
           setLoginSuccess(false);
           setIsSubmitting(false);
+          navigate("/", { replace: true });
         }
-      }, 500); // Small delay to allow profile fetch
-      
-      return () => clearTimeout(timer);
+      } else {
+        // Profile not found - could be RLS issue or trigger didn't run
+        console.error("❌ No profile found for user:", user.id, user.email);
+        console.error("Possible causes:");
+        console.error("1. Profile trigger didn't run during signup");
+        console.error("2. RLS policy blocking profile read");
+        console.error("3. Profile was deleted");
+        toast.error("Profile not found. This might be an RLS issue - check Supabase console.");
+        setLoginSuccess(false);
+        setIsSubmitting(false);
+      }
     }
-  }, [loginSuccess, user, profile, isAdmin, authLoading, navigate]);
+  }, [loginSuccess, user, profile, isAdmin, authLoading, profileFetched, navigate]);
 
   // Timeout fallback - if stuck loading for too long
   useEffect(() => {
@@ -94,6 +105,20 @@ export default function Auth() {
     }
   };
 
+  // Handle redirect for already logged in users (must be in useEffect, not during render)
+  useEffect(() => {
+    if (user && profileFetched && !loginSuccess && !isSubmitting) {
+      if (profile && isAdmin) {
+        console.log("Already logged in as admin, redirecting to /admin");
+        navigate("/admin", { replace: true });
+      } else if (profile) {
+        console.log("Already logged in but not admin, redirecting to /");
+        navigate("/", { replace: true });
+      }
+      // If no profile, stay on auth page - something is wrong
+    }
+  }, [user, profile, isAdmin, profileFetched, loginSuccess, isSubmitting, navigate]);
+
   // Show loading state while checking existing session
   if (authLoading && !isSubmitting) {
     return (
@@ -106,14 +131,16 @@ export default function Auth() {
     );
   }
 
-  // Already logged in - redirect
-  if (user && profile && !loginSuccess) {
-    if (isAdmin) {
-      navigate("/admin", { replace: true });
-    } else {
-      navigate("/", { replace: true });
-    }
-    return null;
+  // If already logged in and redirect is pending, show loading
+  if (user && profileFetched && !loginSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
