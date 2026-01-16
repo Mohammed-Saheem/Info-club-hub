@@ -25,7 +25,7 @@ export {
   type AdminUser,
   type CreateUserData,
   type UpdateUserData,
-  
+
   // APIs
   authAPI,
   eventsAPI,
