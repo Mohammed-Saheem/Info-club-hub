@@ -16,7 +16,7 @@ interface FloatingParticlesProps {
   className?: string;
 }
 
-export function FloatingParticles({ count = 30, className }: FloatingParticlesProps) {
+export function FloatingParticles({ count = 20, className }: FloatingParticlesProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
@@ -24,9 +24,9 @@ export function FloatingParticles({ count = 30, className }: FloatingParticlesPr
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 4 + 1,
-      duration: Math.random() * 20 + 15,
-      delay: Math.random() * 5,
+      size: Math.random() * 2 + 0.5, // Smaller, subtler particles
+      duration: Math.random() * 30 + 25, // Slower movement
+      delay: Math.random() * 8,
     }));
     setParticles(newParticles);
   }, [count]);
@@ -36,7 +36,7 @@ export function FloatingParticles({ count = 30, className }: FloatingParticlesPr
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute rounded-full bg-primary/20"
+          className="absolute rounded-full bg-primary/10" // Softer opacity
           style={{
             left: `${particle.x}%`,
             top: `${particle.y}%`,
@@ -44,10 +44,9 @@ export function FloatingParticles({ count = 30, className }: FloatingParticlesPr
             height: particle.size,
           }}
           animate={{
-            y: [-20, 20, -20],
-            x: [-10, 10, -10],
-            opacity: [0.2, 0.6, 0.2],
-            scale: [1, 1.2, 1],
+            y: [-10, 10, -10], // Smaller movement range
+            x: [-5, 5, -5],
+            opacity: [0.1, 0.3, 0.1], // Much softer opacity range
           }}
           transition={{
             duration: particle.duration,
@@ -110,49 +109,49 @@ export function Spotlight({ className }: { className?: string }) {
   );
 }
 
-// Floating orbs with glow
+// Floating orbs with glow - refined and subtle
 export function GlowingOrbs({ className }: { className?: string }) {
   return (
     <div className={cn("absolute inset-0 overflow-hidden pointer-events-none", className)}>
       <motion.div
         animate={{
-          y: [0, -30, 0],
-          x: [0, 20, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"
-      />
-      <motion.div
-        animate={{
-          y: [0, 20, 0],
-          x: [0, -15, 0],
-          scale: [1, 1.15, 1],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 2,
-        }}
-        className="absolute bottom-1/4 left-1/4 w-48 h-48 bg-primary/8 rounded-full blur-[60px]"
-      />
-      <motion.div
-        animate={{
-          y: [0, -15, 0],
-          x: [0, 10, 0],
+          y: [0, -20, 0],
+          x: [0, 15, 0],
+          scale: [1, 1.05, 1],
         }}
         transition={{
           duration: 12,
           repeat: Infinity,
           ease: "easeInOut",
-          delay: 4,
         }}
-        className="absolute top-1/2 left-1/2 w-72 h-72 bg-gold-dark/5 rounded-full blur-[100px]"
+        className="absolute top-1/4 right-1/4 w-80 h-80 bg-primary/[0.04] rounded-full blur-[100px]"
+      />
+      <motion.div
+        animate={{
+          y: [0, 15, 0],
+          x: [0, -10, 0],
+          scale: [1, 1.08, 1],
+        }}
+        transition={{
+          duration: 15,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 3,
+        }}
+        className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-primary/[0.03] rounded-full blur-[80px]"
+      />
+      <motion.div
+        animate={{
+          y: [0, -12, 0],
+          x: [0, 8, 0],
+        }}
+        transition={{
+          duration: 18,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 6,
+        }}
+        className="absolute top-1/2 left-1/2 w-96 h-96 bg-gold-dark/[0.02] rounded-full blur-[120px]"
       />
     </div>
   );

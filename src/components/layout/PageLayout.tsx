@@ -97,33 +97,23 @@ export default function PageLayout({ children, showFooter = true }: PageLayoutPr
         {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
       
-      {/* Scroll progress indicator */}
+      {/* Scroll progress indicator - moved to bottom, very subtle */}
       <ScrollProgress />
       
-      {/* Cursor glow effect (desktop only) */}
+      {/* Cursor glow effect (desktop only) - refined */}
       <CursorGlow />
       
-      {/* Background ambient effects */}
+      {/* Background ambient effects - subtle and refined */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Top gold glow */}
-        <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] opacity-60" />
-        {/* Bottom subtle glow */}
-        <div className="absolute -bottom-40 right-1/4 w-[500px] h-[500px] bg-primary/3 rounded-full blur-[120px] opacity-40" />
-        {/* Subtle moving gradient orbs */}
-        <motion.div
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] opacity-30"
-        />
-        {/* Noise overlay */}
-        <div className="absolute inset-0 bg-noise opacity-[0.015]" />
+        {/* Cinematic top vignette */}
+        <div className="absolute inset-x-0 top-0 h-[400px] bg-gradient-to-b from-background via-background/50 to-transparent" />
+        {/* Very subtle ambient glow - top center */}
+        <div className="absolute -top-60 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/[0.02] rounded-full blur-[180px]" />
+        {/* Subtle corner accents */}
+        <div className="absolute -bottom-60 -right-60 w-[500px] h-[500px] bg-primary/[0.015] rounded-full blur-[150px]" />
+        <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-primary/[0.01] rounded-full blur-[120px]" />
+        {/* Refined noise texture overlay */}
+        <div className="absolute inset-0 bg-noise opacity-[0.012]" />
       </div>
       
       <Navbar />

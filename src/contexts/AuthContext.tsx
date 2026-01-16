@@ -29,22 +29,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
     // If Supabase is not configured, skip auth setup
     if (!supabase) {
+      console.warn("Supabase client is not configured");
       setIsLoading(false);
       return;
     }
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
         // Fetch profile when user changes
         if (session?.user) {
+          // Use setTimeout to avoid potential Supabase deadlock
           setTimeout(() => {
             fetchProfile(session.user.id);
           }, 0);
@@ -55,11 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log("Initial session check:", session?.user?.email || "No session");
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        await fetchProfile(session.user.id);
       }
       setIsLoading(false);
     });
@@ -70,25 +75,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (userId: string) => {
     if (!supabase) return;
     
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
+    setProfileLoading(true);
+    console.log("Fetching profile for user:", userId);
+    
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-    if (!error && data) {
-      setProfile(data as Profile);
+      if (error) {
+        console.error("Error fetching profile:", error.message, error.details, error.hint);
+        // Check if it's an RLS error
+        if (error.message.includes("RLS") || error.code === "PGRST301") {
+          console.error("This might be a Row Level Security issue. Check RLS policies on profiles table.");
+        }
+      } else if (data) {
+        console.log("Profile fetched successfully:", data);
+        setProfile(data as Profile);
+      } else {
+        console.warn("No profile found for user:", userId);
+        console.warn("You need to create a profile row in the profiles table for this user.");
+      }
+    } catch (err) {
+      console.error("Unexpected error fetching profile:", err);
+    } finally {
+      setProfileLoading(false);
     }
   };
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) {
+      console.error("Supabase client is not configured!");
       return { error: new Error("Supabase is not configured") };
     }
-    const { error } = await supabase.auth.signInWithPassword({
+    console.log("Attempting sign in for:", email);
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    console.log("Sign in result:", { data, error });
     return { error };
   };
 

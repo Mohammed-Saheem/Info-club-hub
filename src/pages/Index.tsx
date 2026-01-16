@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { GlowingOrbs, FloatingParticles } from "@/components/ui/ambient-effects";
 import { GradientText } from "@/components/ui/animated-text";
 import { LiveBadge } from "@/components/ui/badge";
+import { GoldenICSquare } from "@/components/ui/golden-ic-square";
 
 const fadeUp = {
   initial: { opacity: 0, y: 32 },
@@ -56,12 +57,12 @@ export default function Index() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-30%,hsl(43,74%,49%,0.12),transparent_70%)]" />
           {/* Subtle grid pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,214,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,214,0,0.02)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,black,transparent)]" />
-          
+
           {/* New premium ambient effects */}
           <GlowingOrbs />
           <FloatingParticles count={15} />
         </div>
-        
+
         <div className="container mx-auto px-6 lg:px-8 relative z-10 pt-20 lg:pt-32">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             {/* Left Content */}
@@ -120,7 +121,7 @@ export default function Index() {
                   { value: "200+", label: "Active Members" },
                   { value: "30+", label: "Projects Built" },
                 ].map((stat, i) => (
-                  <motion.div 
+                  <motion.div
                     key={stat.label}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -133,7 +134,7 @@ export default function Index() {
               </motion.div>
             </div>
 
-            {/* Right - Premium Abstract Illustration */}
+            {/* Right - Premium 3D Flame Centerpiece */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -143,85 +144,97 @@ export default function Index() {
               <div className="relative w-full aspect-square max-w-lg mx-auto">
                 {/* Outer rotating ring */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-[400px] h-[400px] rounded-full border border-primary/10 animate-rotate-slow" 
+                  <div className="w-[400px] h-[400px] rounded-full border border-primary/10 animate-rotate-slow"
                     style={{ animationDuration: '30s' }}
                   />
                 </div>
-                
+
                 {/* Middle pulsing ring */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-72 h-72 rounded-full border-2 border-primary/20 animate-glow-pulse" />
                 </div>
-                
+
                 {/* Inner glow */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-56 h-56 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 backdrop-blur-xl shadow-glow" />
                 </div>
-                
+
                 {/* Floating feature cards */}
-                <motion.div 
+                <motion.div
                   animate={{ y: [-8, 8, -8], rotate: [-2, 2, -2] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   className="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/50 shadow-card flex items-center justify-center"
                 >
                   <Code className="w-7 h-7 text-primary" />
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   animate={{ y: [8, -8, 8], rotate: [2, -2, 2] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                   className="absolute bottom-16 left-4 w-16 h-16 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/50 shadow-card flex items-center justify-center"
                 >
                   <Users className="w-7 h-7 text-primary" />
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   animate={{ y: [-6, 6, -6] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   className="absolute top-1/3 -left-4 w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-gold-dark shadow-gold flex items-center justify-center"
                 >
                   <Zap className="w-6 h-6 text-primary-foreground" />
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   animate={{ y: [6, -6, 6], x: [-4, 4, -4] }}
                   transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
                   className="absolute bottom-1/4 right-0 w-14 h-14 rounded-xl bg-card/80 backdrop-blur-xl border border-primary/30 shadow-gold-soft flex items-center justify-center"
                 >
                   <Trophy className="w-6 h-6 text-primary" />
                 </motion.div>
-                
-                {/* Center logo */}
+
+                {/* Golden IC Square Centerpiece - The Heart of Infoclub */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative">
+                  <motion.div
+                    animate={{
+                      y: [0, -12, 0],
+                      scale: [1, 1.03, 1],
+                      rotate: [-1.5, 1.5, -1.5]
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="relative"
+                  >
                     <div className="absolute inset-0 bg-primary/40 rounded-3xl blur-2xl animate-glow-pulse" />
-                    <div className="relative w-28 h-28 rounded-3xl shadow-gold-intense overflow-hidden">
-                      <img 
-                        src="/INFOCLUB[1].jpg" 
-                        alt="INFO CLUB Logo" 
+                    <div className="relative w-28 h-28 rounded-3xl shadow-gold-intense overflow-hidden border border-primary/20 bg-background/50 backdrop-blur-sm">
+                      <img
+                        src="/INFOCLUB[1].jpg"
+                        alt="INFO CLUB Logo"
                         className="w-full h-full object-cover"
                       />
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
           </div>
         </div>
-        
+
         {/* Scroll indicator */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
-          <motion.div 
+          <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
             className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2"
           >
-            <motion.div 
+            <motion.div
               animate={{ y: [0, 8, 0], opacity: [1, 0, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
               className="w-1 h-2 rounded-full bg-primary"
@@ -236,7 +249,7 @@ export default function Index() {
       <section className="py-28 lg:py-36 bg-gradient-to-b from-background via-card/30 to-background relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(43,74%,49%,0.05),transparent_40%)]" />
-        
+
         <div className="container mx-auto px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             <motion.div {...fadeUp}>
@@ -249,11 +262,11 @@ export default function Index() {
                 <span className="text-gradient-gold">Tech Excellence</span>
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                INFO CLUB is the official student organization of the Information Technology department, 
+                INFO CLUB is the official student organization of the Information Technology department,
                 dedicated to fostering technical excellence, innovation, and professional growth among students.
               </p>
               <p className="text-muted-foreground leading-relaxed mb-10">
-                We bridge the gap between academic learning and industry requirements through workshops, 
+                We bridge the gap between academic learning and industry requirements through workshops,
                 hackathons, tech talks, and collaborative projects that prepare students for real-world challenges.
               </p>
               <Link to="/about">
@@ -264,7 +277,7 @@ export default function Index() {
               </Link>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               {...fadeUp}
               className="grid grid-cols-2 gap-5"
             >
@@ -284,7 +297,7 @@ export default function Index() {
                 >
                   {/* Hover glow */}
                   <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
+
                   <div className="relative z-10">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:shadow-gold-soft transition-all duration-500">
                       <item.icon className="w-6 h-6 text-primary" />
@@ -314,12 +327,12 @@ export default function Index() {
               <span className="text-gradient-gold">Tech Leaders</span>
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              From intensive coding workshops to exclusive industry networking events, we create 
+              From intensive coding workshops to exclusive industry networking events, we create
               transformative opportunities for ambitious minds.
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="initial"
             whileInView="whileInView"
@@ -339,7 +352,7 @@ export default function Index() {
               >
                 {/* Top accent line */}
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
+
                 <div className="relative z-10">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-gold-dark flex items-center justify-center mb-7 group-hover:scale-105 group-hover:shadow-gold transition-all duration-500">
                     <feature.icon className="w-7 h-7 text-primary-foreground" />
@@ -358,7 +371,7 @@ export default function Index() {
           ═══════════════════════════════════════════════════════════════════════ */}
       <section className="py-28 lg:py-36 bg-gradient-to-b from-card/50 via-card/30 to-background relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(43,74%,49%,0.06),transparent)]" />
-        
+
         <div className="container mx-auto px-6 lg:px-8 relative z-10">
           <motion.div {...fadeUp} className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
             <div>
@@ -400,16 +413,16 @@ export default function Index() {
                       <Calendar className="w-14 h-14 text-primary/30" />
                     </div>
                   )}
-                  
+
                   {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
+
                   {/* Date Badge */}
                   <div className="absolute top-4 left-4 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-gold-light text-primary-foreground font-bold text-sm shadow-gold-soft">
                     {new Date(event.event_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </div>
                 </div>
-                
+
                 <div>
                   <p className="text-sm text-primary font-medium mb-2">{event.venue || "TBA"}</p>
                   <h3 className="font-heading text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
@@ -463,14 +476,14 @@ export default function Index() {
               >
                 {/* Hover accent */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-gold-dark opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
+
                 <div className="flex-1 pl-4">
                   <h3 className="font-heading text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
                     {project.title}
                   </h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{project.description}</p>
                 </div>
-                
+
                 <div className="flex items-center gap-6 pl-4 md:pl-0">
                   <div className="flex flex-wrap gap-2">
                     {project.tech_stack?.slice(0, 3).map((tech) => (
@@ -506,12 +519,12 @@ export default function Index() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-gold-dark to-primary" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,hsl(0,0%,100%,0.1),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,hsl(0,0%,0%,0.2),transparent_50%)]" />
-        
+
         {/* Noise texture */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }} />
-        
+
         <div className="container mx-auto px-6 lg:px-8 relative z-10">
-          <motion.div 
+          <motion.div
             {...fadeUp}
             className="max-w-3xl"
           >
@@ -525,16 +538,16 @@ export default function Index() {
               <Sparkles className="w-4 h-4 text-primary-foreground" />
               <span className="text-sm font-semibold text-primary-foreground">Get In Touch</span>
             </motion.div>
-            
+
             <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-[1.1] mb-8">
               Have questions or<br />want to collaborate?
             </h2>
-            
+
             <p className="text-xl md:text-2xl text-primary-foreground/80 mb-12 max-w-xl leading-relaxed">
-              Reach out to INFO CLUB for collaborations, event inquiries, 
+              Reach out to INFO CLUB for collaborations, event inquiries,
               or to learn more about what we do.
             </p>
-            
+
             <div className="flex flex-wrap gap-4">
               <Link to="/contact">
                 <Button size="xl" variant="secondary" className="bg-background text-foreground hover:bg-background/90 shadow-lg group">
@@ -550,7 +563,7 @@ export default function Index() {
             </div>
           </motion.div>
         </div>
-        
+
         {/* Decorative bottom border */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
       </section>
