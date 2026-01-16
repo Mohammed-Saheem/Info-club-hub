@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Windows temp files
+*.tmp
+*.bin
+*.exe
+*.dat
+Thumbs.db
+*.ses
+*.squirrel-*
