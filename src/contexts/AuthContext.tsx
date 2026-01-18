@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,6 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [profileFetched, setProfileFetched] = useState(false);
 
+  // Ref to track the user ID for which we've fetched/are fetching a profile
+  // This helps prevent infinite loops during token refreshes
+  const lastFetchedUserId = useRef<string | null>(null);
+
   useEffect(() => {
     // If Supabase is not configured, skip auth setup
     if (!supabase) {
@@ -41,80 +45,103 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    let initialSessionHandled = false;
+    // Flag to track if the listener has handled the initial session
+    let initialEventHandled = false;
 
     // Set up auth state listener
+    // IMPORTANT: Keep this listener synchronous and lean to avoid blocking Supabase internal state updates
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.email);
-        
-        // Skip if this is the initial session - we handle that separately
-        if (event === 'INITIAL_SESSION') {
-          console.log("Skipping INITIAL_SESSION in listener - handled by getSession");
-          return;
-        }
-        
+      (event, session) => {
+        console.log(`AuthProvider: Auth state changed [${event}]`, session?.user?.email);
+
+        // Track that we've seen at least one event
+        initialEventHandled = true;
+
+        // Update local state - do NOT do async work here
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Fetch profile when user changes
-        if (session?.user) {
-          // IMPORTANT: Reset profileFetched before fetching new profile
-          setProfileFetched(false);
-          setProfile(null);
-          // Use setTimeout to avoid blocking auth state update
-          setTimeout(async () => {
-            await fetchProfile(session.user.id);
-          }, 0);
-        } else {
+
+        if (!session?.user) {
+          lastFetchedUserId.current = null;
           setProfile(null);
           setProfileFetched(true);
         }
+
+        // Always mark loading as false once the first event is processed
+        setIsLoading(false);
       }
     );
 
-    // Check for existing session
+    // Initial session fallback check
     const initSession = async () => {
       try {
+        console.log("AuthProvider: Initializing session fallback...");
         const { data: { session } } = await supabase.auth.getSession();
-        console.log("Initial session check:", session?.user?.email || "No session");
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfileFetched(true);
+
+        // If the listener hasn't fired yet, use the initial session data
+        if (!initialEventHandled) {
+          console.log("AuthProvider: Listener hasn't fired, using getSession data");
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (!session?.user) {
+            setProfileFetched(true);
+          }
+          setIsLoading(false);
         }
       } catch (err) {
-        console.error("Error getting session:", err);
+        console.error("AuthProvider: Initial session error:", err);
         setProfileFetched(true);
-      } finally {
-        initialSessionHandled = true;
         setIsLoading(false);
       }
     };
-    
+
     initSession();
 
-    return () => subscription.unsubscribe();
+    // Safety timeout: Ensure we never hang in loading state 
+    // Increased to 15s to handle slower DB responses
+    const safetyTimeout = setTimeout(() => {
+      if (isLoading || (user && !profileFetched)) {
+        console.warn("AuthProvider: ⚠️ Safety timeout reached (15s), forcing loading states to resolve");
+        setIsLoading(false);
+        setProfileFetched(true);
+      }
+    }, 15000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(safetyTimeout);
+    };
   }, []);
 
-  const fetchProfile = async (userId: string) => {
-    if (!supabase) {
-      console.warn("Supabase not configured, skipping profile fetch");
-      setProfileFetched(true);
-      return;
-    }
-    
-    console.log("Fetching profile for user:", userId);
-    
-    try {
-      // Get the current user email
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      const userEmail = currentUser?.email || '';
+  // Separate effect for profile fetching to keep the auth listener non-blocking
+  useEffect(() => {
+    if (user) {
+      const userIdChanged = user.id !== lastFetchedUserId.current;
 
-      // First, attempt to fetch the profile
+      if (userIdChanged) {
+        console.log(`AuthProvider: User change detected (${user.id}), fetching profile...`);
+        setProfile(null);
+        setProfileFetched(false);
+        fetchProfile(user.id, user.email);
+      } else if (!profileFetched && !profile) {
+        // Fallback for cases where we have a user but fetch hasn't started
+        console.log("AuthProvider: Profile missing for existing user, triggering fetch...");
+        fetchProfile(user.id, user.email);
+      }
+    }
+  }, [user, profile, profileFetched]);
+
+  const fetchProfile = async (userId: string, emailHint?: string) => {
+    if (!supabase) return;
+
+    // Update ref immediately to prevent overlap
+    lastFetchedUserId.current = userId;
+
+    console.log("AuthProvider: Fetching profile for user:", userId);
+
+    try {
+      // Fetch the profile directly using the userId
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -122,55 +149,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (error) {
-        console.error("Error fetching profile:", error.message, error.details, error.hint);
-        console.error("Error code:", error.code);
-        
-        // If there's an error, try to create the profile anyway
-        console.warn("Attempting to create profile after fetch error...");
-        const { data: createdProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert({
-            user_id: userId,
-            email: userEmail,
-            full_name: currentUser?.user_metadata?.full_name || null,
-            is_admin: false
-          })
-          .select()
-          .maybeSingle();
-        
-        if (createError) {
-          console.error("Failed to create profile:", createError);
-          // Even if creation fails, mark as fetched to unblock the UI
-          // The user might still be able to use the app
-        } else if (createdProfile) {
-          console.log("✅ Profile created:", createdProfile);
-          setProfile(createdProfile as Profile);
-        }
+        console.error("AuthProvider: Error fetching profile:", error.message);
+        // Mark as fetched anyway so we don't block the UI forever
       } else if (data) {
-        console.log("✅ Profile fetched successfully:", data);
+        console.log("AuthProvider: ✅ Profile fetched successfully:", data);
         setProfile(data as Profile);
       } else {
-        console.warn("No profile found for user, attempting to create one...");
-        const { data: createdProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert({
-            user_id: userId,
-            email: userEmail,
-            full_name: currentUser?.user_metadata?.full_name || null,
-            is_admin: false
-          })
-          .select()
-          .maybeSingle();
-        
-        if (createError) {
-          console.error("Failed to create profile:", createError);
-        } else if (createdProfile) {
-          console.log("✅ Profile created:", createdProfile);
-          setProfile(createdProfile as Profile);
-        }
+        console.warn("AuthProvider: No profile record found for user. The database trigger should create one shortly.");
       }
     } catch (err) {
-      console.error("Unexpected error fetching/creating profile:", err);
+      console.error("AuthProvider: Unexpected profile fetch error:", err);
     } finally {
       setProfileFetched(true);
     }
@@ -195,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: new Error("Supabase is not configured") };
     }
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -213,8 +201,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       await supabase.auth.signOut();
     }
-    setProfile(null);
-    setProfileFetched(false);
+    // We don't manually reset state here anymore. 
+    // The onAuthStateChange listener will handle the 'SIGNED_OUT' event 
+    // and naturally reset user, session, profile, and profileFetched.
   };
 
   // isLoading should be true until BOTH auth check AND profile fetch are complete
