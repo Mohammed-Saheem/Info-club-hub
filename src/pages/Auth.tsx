@@ -35,7 +35,7 @@ export default function Auth() {
       console.log("=== LOGIN SUCCESS - CHECKING REDIRECT ===");
       console.log("profile:", profile);
       console.log("isAdmin:", isAdmin);
-      
+
       if (profile) {
         if (isAdmin) {
           console.log("✅ Redirecting to admin...");
@@ -54,7 +54,8 @@ export default function Auth() {
         console.error("1. Profile trigger didn't run during signup");
         console.error("2. RLS policy blocking profile read");
         console.error("3. Profile was deleted");
-        toast.error("Profile not found. This might be an RLS issue - check Supabase console.");
+
+        // Suppress toast message as requested for a cleaner login experience
         setLoginSuccess(false);
         setIsSubmitting(false);
       }
@@ -131,8 +132,9 @@ export default function Auth() {
     );
   }
 
-  // If already logged in and redirect is pending, show loading
-  if (user && profileFetched && !loginSuccess) {
+  // If already logged in and redirect is pending, show loading ONLY if we have a profile to redirect based on
+  // AND we are not still in the process of signing in (loginSuccess)
+  if (user && profileFetched && profile && !loginSuccess) {
     return (
       <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
         <div className="text-center">

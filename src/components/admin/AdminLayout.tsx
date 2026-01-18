@@ -15,21 +15,24 @@ const navItems = [
 ];
 
 export default function AdminLayout() {
-  const { user, isAdmin, isLoading, signOut } = useAuth();
+  const { user, isAdmin, isLoading, profileFetched, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Only redirect if loading is complete
-    if (!isLoading) {
+    // Only redirect if auth loading AND profile fetching are complete
+    if (!isLoading && profileFetched) {
       if (!user) {
-        navigate("/auth");
+        console.warn(`AdminLayout: No user session found at ${location.pathname}. Redirecting to /auth`);
+        navigate("/auth", { replace: true });
       } else if (!isAdmin) {
-        // Only redirect non-admins after confirming auth state is settled
-        navigate("/");
+        console.warn(`AdminLayout: User ${user.email} is NOT an admin. Redirecting to home`);
+        navigate("/", { replace: true });
+      } else {
+        console.log(`AdminLayout: ✅ Admin access verified for ${user.email}`);
       }
     }
-  }, [user, isAdmin, isLoading, navigate]);
+  }, [user, isAdmin, isLoading, profileFetched, navigate, location.pathname]);
 
   // Show loading while auth state is being determined
   if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" /></div>;
