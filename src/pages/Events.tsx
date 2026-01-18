@@ -28,46 +28,35 @@ export default function Events() {
 
   return (
     <PageLayout>
-      {/* Hero */}
-      <section className="pt-28 pb-20 relative overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-30%,hsl(43,74%,49%,0.12),transparent_70%)]" />
+      {/* Hero - Gold gradient from left to black right */}
+      <Section variant="hero" spacing="hero">
+        {/* Extra gold glow on left side */}
+        <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-[radial-gradient(ellipse_80%_100%_at_0%_30%,hsl(43,65%,56%,0.12),transparent_70%)] pointer-events-none" />
         <GlowingOrbs />
         <FloatingParticles count={12} />
         
-        <div className="container mx-auto px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          className="max-w-3xl mx-auto text-center relative z-10"
+        >
+          <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
+            Our <GradientText>Events</GradientText>
+          </h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-            className="max-w-3xl mx-auto text-center"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="mb-8"
-            >
-              <LiveBadge>Discover &amp; Learn</LiveBadge>
-            </motion.div>
-            
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
-              Our <GradientText>Events</GradientText>
-            </h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
-            >
-              Explore our exclusive workshops, hackathons, and tech talks designed to elevate your skills.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
+            Explore our exclusive workshops, hackathons, and tech talks designed to elevate your skills.
+          </motion.p>
+        </motion.div>
+      </Section>
 
-      {/* Search */}
-      <Section variant="gradient" spacing="lg">
+      {/* Events List - Dark section */}
+      <Section variant="dark" spacing="lg">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

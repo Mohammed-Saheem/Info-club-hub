@@ -10,12 +10,13 @@ import { GlowingOrbs, FloatingParticles } from "@/components/ui/ambient-effects"
 import { GradientText } from "@/components/ui/animated-text";
 import { LiveBadge } from "@/components/ui/badge";
 import { GoldenICSquare } from "@/components/ui/golden-ic-square";
+import { AnimatedCard, FeatureCard, StatsCard } from "@/components/ui/animated-card";
 
 const fadeUp = {
   initial: { opacity: 0, y: 32 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-80px" },
-  transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }
+  transition: { duration: 0.6, ease: "easeInOut" as const }
 };
 
 const staggerContainer = {
@@ -31,7 +32,7 @@ const staggerContainer = {
 const staggerItem = {
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
+  transition: { duration: 0.5, ease: "easeInOut" as const }
 };
 
 export default function Index() {
@@ -51,17 +52,16 @@ export default function Index() {
           HERO SECTION — Grand & Confident
           ═══════════════════════════════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Ambient background effects */}
-        <div className="absolute inset-0">
-          {/* Radial gradient from top */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-30%,hsl(43,74%,49%,0.12),transparent_70%)]" />
-          {/* Subtle grid pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,214,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,214,0,0.02)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,black,transparent)]" />
+        {/* Gold gradient from left to black right - premium hero */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(43,65%,56%,0.12)] via-[hsl(220,15%,5%)] to-[hsl(220,15%,4%)]" />
+        {/* Extra gold glow on left side */}
+        <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-[radial-gradient(ellipse_80%_100%_at_0%_30%,hsl(43,65%,56%,0.15),transparent_70%)]" />
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(212,168,75,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(212,168,75,0.02)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,black,transparent)]" />
 
-          {/* New premium ambient effects */}
-          <GlowingOrbs />
-          <FloatingParticles count={15} />
-        </div>
+        {/* New premium ambient effects */}
+        <GlowingOrbs />
+        <FloatingParticles count={15} />
 
         <div className="container mx-auto px-6 lg:px-8 relative z-10 pt-20 lg:pt-32">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
@@ -72,7 +72,7 @@ export default function Index() {
               <motion.h1
                 initial={{ opacity: 0, y: 32 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.7, delay: 0.15, ease: "easeInOut" }}
                 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05] tracking-tight mb-8"
               >
                 Welcome to INFO CLUB
@@ -82,7 +82,7 @@ export default function Index() {
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.6, delay: 0.35, ease: "easeInOut" }}
                 className="text-xl md:text-2xl text-muted-foreground leading-relaxed mb-12 max-w-xl"
               >
                 An exclusive community for ambitious minds pushing the boundaries of technology and innovation.
@@ -92,7 +92,7 @@ export default function Index() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.6, delay: 0.45, ease: "easeInOut" }}
                 className="flex flex-wrap gap-4"
               >
                 <Link to="/events">
@@ -114,22 +114,20 @@ export default function Index() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
-                className="flex gap-12 mt-16 pt-10 border-t border-border/30"
+                className="flex gap-6 mt-16 pt-10 border-t border-border/30"
               >
                 {[
                   { value: "50+", label: "Events Hosted" },
                   { value: "200+", label: "Active Members" },
                   { value: "30+", label: "Projects Built" },
                 ].map((stat, i) => (
-                  <motion.div
+                  <StatsCard
                     key={stat.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.7 + i * 0.1 }}
-                  >
-                    <div className="font-heading text-4xl font-bold text-gradient-gold">{stat.value}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
-                  </motion.div>
+                    value={stat.value}
+                    label={stat.label}
+                    delay={0.7 + i * 0.1}
+                    className="flex-1 min-w-[120px]"
+                  />
                 ))}
               </motion.div>
             </div>
@@ -138,7 +136,7 @@ export default function Index() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeInOut" }}
               className="hidden lg:block relative"
             >
               <div className="relative w-full aspect-square max-w-lg mx-auto">
@@ -244,9 +242,9 @@ export default function Index() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          ABOUT SECTION — Value Proposition
+          ABOUT SECTION — Value Proposition (Dark)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 lg:py-36 bg-gradient-to-b from-background via-card/30 to-background relative overflow-hidden">
+      <section className="py-28 lg:py-36 bg-[hsl(220,15%,4%)] relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(43,74%,49%,0.05),transparent_40%)]" />
 
@@ -287,25 +285,14 @@ export default function Index() {
                 { icon: Users, title: "Connect", desc: "Network with industry professionals" },
                 { icon: Trophy, title: "Grow", desc: "Leadership and career development" },
               ].map((item, i) => (
-                <motion.div
+                <FeatureCard
                   key={item.title}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="group p-7 rounded-2xl bg-gradient-to-b from-card to-card/80 border border-border/50 hover:border-primary/30 hover:shadow-card-hover hover:-translate-y-2 transition-all duration-500 relative overflow-hidden"
-                >
-                  {/* Hover glow */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  <div className="relative z-10">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:shadow-gold-soft transition-all duration-500">
-                      <item.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="font-heading text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                  </div>
-                </motion.div>
+                  icon={item.icon}
+                  title={item.title}
+                  description={item.desc}
+                  delay={i * 0.1}
+                  className="bg-gradient-to-br from-card/80 to-card/40"
+                />
               ))}
             </motion.div>
           </div>
@@ -313,9 +300,9 @@ export default function Index() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          FEATURES SECTION — What We Do
+          FEATURES SECTION — What We Do (Grey)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 lg:py-36 bg-background relative">
+      <section className="py-28 lg:py-36 bg-[hsl(220,12%,8%)] relative">
         <div className="container mx-auto px-6 lg:px-8">
           <motion.div {...fadeUp} className="max-w-2xl mb-20">
             <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-widest mb-6">
@@ -345,32 +332,24 @@ export default function Index() {
               { icon: Users, title: "Tech Talks", desc: "Exclusive insights from industry leaders and successful founders" },
               { icon: Zap, title: "Projects", desc: "Collaborative initiatives building portfolio-worthy solutions" },
             ].map((feature, i) => (
-              <motion.div
+              <FeatureCard
                 key={feature.title}
-                variants={staggerItem}
-                className="group p-8 rounded-2xl bg-gradient-to-b from-card to-card/80 border border-border/50 hover:border-primary/30 hover:-translate-y-2 hover:shadow-card-hover transition-all duration-500 relative overflow-hidden"
-              >
-                {/* Top accent line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-gold-dark flex items-center justify-center mb-7 group-hover:scale-105 group-hover:shadow-gold transition-all duration-500">
-                    <feature.icon className="w-7 h-7 text-primary-foreground" />
-                  </div>
-                  <h3 className="font-heading text-xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
-                </div>
-              </motion.div>
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.desc}
+                delay={i * 0.1}
+                className="h-full"
+              />
             ))}
           </motion.div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          EVENTS SECTION — Social Proof
+          EVENTS SECTION — Social Proof (Dark)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 lg:py-36 bg-gradient-to-b from-card/50 via-card/30 to-background relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(43,74%,49%,0.06),transparent)]" />
+      <section className="py-28 lg:py-36 bg-[hsl(220,15%,4%)] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(43,65%,56%,0.04),transparent)]" />
 
         <div className="container mx-auto px-6 lg:px-8 relative z-10">
           <motion.div {...fadeUp} className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
@@ -402,7 +381,7 @@ export default function Index() {
                 initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: "easeInOut" }}
                 className="group"
               >
                 <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-card border border-border/50 group-hover:border-primary/30 transition-all duration-500">
@@ -437,9 +416,9 @@ export default function Index() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          PROJECTS SECTION — Proof of Excellence
+          PROJECTS SECTION — Proof of Excellence (Grey)
           ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 lg:py-36 bg-background relative">
+      <section className="py-28 lg:py-36 bg-[hsl(220,12%,8%)] relative">
         <div className="container mx-auto px-6 lg:px-8">
           <motion.div {...fadeUp} className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
             <div>
@@ -471,7 +450,7 @@ export default function Index() {
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{ duration: 0.4, delay: i * 0.08, ease: "easeInOut" }}
                 className="group flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-2xl border border-border/50 bg-gradient-to-r from-card/50 to-transparent hover:border-primary/30 hover:bg-card/50 transition-all duration-500 relative overflow-hidden"
               >
                 {/* Hover accent */}

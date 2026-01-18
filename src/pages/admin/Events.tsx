@@ -49,7 +49,7 @@ export default function AdminEvents() {
     mutationFn: async (formData: FormData) => {
       setIsUploading(true);
       let bannerImageUrl: string | undefined;
-      
+
       // Upload image first if selected
       if (imageFile) {
         try {
@@ -106,18 +106,17 @@ export default function AdminEvents() {
               {/* Image Upload */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Event Banner</label>
-                <div 
-                  className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${
-                    imagePreview 
-                      ? "border-primary/50 bg-primary/5" 
+                <div
+                  className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${imagePreview
+                      ? "border-primary/50 bg-primary/5"
                       : "border-border/50 hover:border-primary/30 hover:bg-muted/30"
-                  }`}
+                    }`}
                 >
                   {imagePreview ? (
                     <div className="relative aspect-video">
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
                         className="w-full h-full object-cover rounded-lg"
                       />
                       <button
@@ -147,15 +146,24 @@ export default function AdminEvents() {
                 </div>
               </div>
 
-              <Input name="title" placeholder="Event Title" required />
-              <div className="grid grid-cols-2 gap-4">
-                <Input name="date" type="date" required />
-                <Input name="venue" placeholder="Venue" />
+              <div className="space-y-4">
+                <Input name="title" placeholder="Event Title" required className="bg-background/50" />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input name="date" type="date" required className="bg-background/50" />
+                  <Input name="venue" placeholder="Venue" className="bg-background/50" />
+                </div>
+                <div className="space-y-2">
+                  <Textarea
+                    name="description"
+                    placeholder="Event Description"
+                    rows={4}
+                    className="bg-background/50 resize-none min-h-[100px]"
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={createMutation.isPending || isUploading}>
+                  {isUploading ? "Uploading..." : createMutation.isPending ? "Creating..." : "Create Event"}
+                </Button>
               </div>
-              <Textarea name="description" placeholder="Description" rows={3} />
-              <Button type="submit" className="w-full" disabled={createMutation.isPending || isUploading}>
-                {isUploading ? "Uploading..." : createMutation.isPending ? "Creating..." : "Create Event"}
-              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -176,9 +184,9 @@ export default function AdminEvents() {
               <tr key={event.id} className="border-t border-border">
                 <td className="p-4">
                   {event.banner_image ? (
-                    <img 
-                      src={event.banner_image} 
-                      alt={event.title} 
+                    <img
+                      src={event.banner_image}
+                      alt={event.title}
                       className="w-12 h-12 rounded-lg object-cover"
                     />
                   ) : (

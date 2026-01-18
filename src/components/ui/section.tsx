@@ -6,8 +6,8 @@ interface SectionProps {
   children: ReactNode;
   className?: string;
   id?: string;
-  variant?: "default" | "dark" | "gradient" | "gold";
-  spacing?: "default" | "lg" | "xl";
+  variant?: "default" | "dark" | "gradient" | "gold" | "hero" | "grey";
+  spacing?: "default" | "lg" | "xl" | "hero";
 }
 
 export function Section({ 
@@ -20,14 +20,23 @@ export function Section({
   const spacingStyles = {
     default: "py-20 md:py-28",
     lg: "py-24 md:py-32",
-    xl: "py-28 md:py-40"
+    xl: "py-28 md:py-40",
+    hero: "pt-28 pb-20 md:pt-36 md:pb-28"
   };
 
   const variantStyles = {
-    default: "bg-background",
-    dark: "bg-card/50 relative before:absolute before:inset-0 before:bg-gradient-to-b before:from-background/50 before:to-transparent before:pointer-events-none",
-    gradient: "bg-gradient-to-b from-background via-card/30 to-background relative overflow-hidden",
-    gold: "bg-gradient-to-b from-primary/5 via-background to-background relative overflow-hidden"
+    // Pure black background
+    default: "bg-[hsl(220,15%,4%)]",
+    // Slightly elevated dark (for alternating)
+    dark: "bg-[hsl(220,15%,4%)]",
+    // Grey section (for alternating with dark)
+    grey: "bg-[hsl(220,12%,8%)]",
+    // Gradient background
+    gradient: "bg-gradient-to-b from-[hsl(220,15%,4%)] via-[hsl(220,12%,7%)] to-[hsl(220,15%,4%)]",
+    // Gold accent section
+    gold: "bg-[hsl(220,15%,4%)] relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,hsl(43,65%,56%,0.12),transparent_60%)] before:pointer-events-none",
+    // Hero section with gold gradient from left to black on right
+    hero: "relative overflow-hidden bg-gradient-to-r from-[hsl(43,65%,56%,0.08)] via-[hsl(220,15%,5%)] to-[hsl(220,15%,4%)]"
   };
 
   return (
@@ -35,6 +44,10 @@ export function Section({
       id={id} 
       className={cn(spacingStyles[spacing], variantStyles[variant], "relative", className)}
     >
+      {/* Add subtle top highlight for hero */}
+      {variant === "hero" && (
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_0%_0%,hsl(43,65%,56%,0.15),transparent_50%)] pointer-events-none" />
+      )}
       <div className="container mx-auto px-6 lg:px-8 relative z-10">
         {children}
       </div>

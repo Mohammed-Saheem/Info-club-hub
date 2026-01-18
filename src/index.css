@@ -12,9 +12,9 @@
 @layer base {
   :root {
     /* ─────────────────────────────────────────────────────────────────────────
-       Primary: Premium Metallic Yellow (#fef956) — Subtle luxury, not flashy
+       Primary: Rich Gold (#D4A84B) — Premium luxury gold matching logo
        ───────────────────────────────────────────────────────────────────────── */
-    --primary: 56 99% 67%;
+    --primary: 43 65% 56%;
     --primary-foreground: 0 0% 3%;
     
     /* ─────────────────────────────────────────────────────────────────────────
@@ -41,8 +41,8 @@
     --muted: 220 6% 14%;
     --muted-foreground: 40 5% 55%;
 
-    /* Accent: Refined yellow */
-    --accent: 56 99% 67%;
+    /* Accent: Rich gold */
+    --accent: 43 65% 56%;
     --accent-foreground: 0 0% 3%;
 
     /* Destructive: Premium red */
@@ -52,17 +52,17 @@
     /* Border: Subtle warm gray */
     --border: 220 8% 16%;
     --input: 220 8% 14%;
-    --ring: 56 99% 67%;
+    --ring: 43 65% 56%;
 
     --radius: 0.875rem;
 
     /* ─────────────────────────────────────────────────────────────────────────
-       Premium Yellow Palette — Metallic, luxurious tones (#fef956)
+       Premium Gold Palette — Rich, luxurious gold tones matching logo
        ───────────────────────────────────────────────────────────────────────── */
-    --gold: 56 99% 67%;
-    --gold-light: 57 100% 74%;
-    --gold-dark: 54 98% 55%;
-    --gold-muted: 56 95% 60%;
+    --gold: 43 65% 56%;
+    --gold-light: 45 70% 65%;
+    --gold-dark: 40 70% 45%;
+    --gold-muted: 42 50% 50%;
     
     /* Bronze & Copper accents */
     --bronze: 30 60% 35%;
@@ -75,49 +75,50 @@
     --dark-elevated: 220 6% 14%;
 
     /* ─────────────────────────────────────────────────────────────────────────
-       Premium Gradients — Depth & Elegance
+       Premium Gradients — Depth & Elegance with Rich Gold
        ───────────────────────────────────────────────────────────────────────── */
-    --gradient-gold: linear-gradient(135deg, hsl(56, 99%, 67%) 0%, hsl(54, 98%, 55%) 50%, hsl(56, 99%, 67%) 100%);
-    --gradient-gold-subtle: linear-gradient(135deg, hsl(56, 99%, 67%, 0.15) 0%, hsl(54, 98%, 55%, 0.08) 100%);
-    --gradient-gold-shimmer: linear-gradient(90deg, transparent 0%, hsl(56, 99%, 74%, 0.4) 50%, transparent 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(43, 65%, 56%) 0%, hsl(40, 70%, 45%) 50%, hsl(43, 65%, 56%) 100%);
+    --gradient-gold-subtle: linear-gradient(135deg, hsl(43, 65%, 56%, 0.15) 0%, hsl(40, 70%, 45%, 0.08) 100%);
+    --gradient-gold-shimmer: linear-gradient(90deg, transparent 0%, hsl(45, 70%, 65%, 0.4) 50%, transparent 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 15%, 4%) 0%, hsl(220, 10%, 7%) 50%, hsl(220, 8%, 10%) 100%);
-    --gradient-hero: radial-gradient(ellipse 80% 50% at 50% -20%, hsl(43, 74%, 49%, 0.12) 0%, transparent 50%),
+    --gradient-hero: radial-gradient(ellipse 100% 80% at 50% -20%, hsl(43, 65%, 56%, 0.18) 0%, transparent 60%),
+                     radial-gradient(ellipse 60% 50% at 50% 0%, hsl(40, 70%, 45%, 0.12) 0%, transparent 50%),
                      linear-gradient(180deg, hsl(220, 15%, 4%) 0%, hsl(220, 10%, 6%) 100%);
-    --gradient-radial-gold: radial-gradient(circle at 50% 0%, hsl(56, 99%, 67%, 0.15) 0%, transparent 50%);
+    --gradient-radial-gold: radial-gradient(circle at 50% 0%, hsl(43, 65%, 56%, 0.18) 0%, transparent 50%);
     --gradient-card: linear-gradient(145deg, hsl(220, 10%, 9%) 0%, hsl(220, 10%, 6%) 100%);
     --gradient-glass: linear-gradient(135deg, hsl(220, 10%, 12%, 0.8) 0%, hsl(220, 10%, 8%, 0.6) 100%);
 
     /* ─────────────────────────────────────────────────────────────────────────
        Premium Shadows — Depth & Glow
        ───────────────────────────────────────────────────────────────────────── */
-    --shadow-gold: 0 4px 24px hsl(56, 99%, 67%, 0.25),
-                   0 8px 48px hsl(56, 99%, 67%, 0.15);
-    --shadow-gold-intense: 0 8px 32px hsl(56, 99%, 67%, 0.35),
-                           0 16px 64px hsl(56, 99%, 67%, 0.2);
-    --shadow-gold-soft: 0 2px 12px hsl(56, 99%, 67%, 0.15);
+    --shadow-gold: 0 4px 24px hsl(43, 65%, 56%, 0.3),
+                   0 8px 48px hsl(43, 65%, 56%, 0.2);
+    --shadow-gold-intense: 0 8px 32px hsl(43, 65%, 56%, 0.4),
+                           0 16px 64px hsl(43, 65%, 56%, 0.25);
+    --shadow-gold-soft: 0 2px 12px hsl(43, 65%, 56%, 0.2);
     --shadow-card: 0 4px 24px hsl(0, 0%, 0%, 0.3),
                    0 8px 48px hsl(0, 0%, 0%, 0.2);
     --shadow-card-hover: 0 8px 40px hsl(0, 0%, 0%, 0.4),
                          0 16px 64px hsl(0, 0%, 0%, 0.25);
-    --shadow-glow: 0 0 80px hsl(56, 99%, 67%, 0.15),
-                   0 0 120px hsl(56, 99%, 67%, 0.1);
+    --shadow-glow: 0 0 80px hsl(43, 65%, 56%, 0.2),
+                   0 0 120px hsl(43, 65%, 56%, 0.12);
     --shadow-inner: inset 0 1px 0 hsl(0, 0%, 100%, 0.05);
-    --shadow-border: inset 0 0 0 1px hsl(56, 99%, 67%, 0.1);
+    --shadow-border: inset 0 0 0 1px hsl(43, 65%, 56%, 0.1);
 
     /* Sidebar */
     --sidebar-background: 220 12% 5%;
     --sidebar-foreground: 40 20% 96%;
-    --sidebar-primary: 56 99% 67%;
+    --sidebar-primary: 43 65% 56%;
     --sidebar-primary-foreground: 0 0% 3%;
     --sidebar-accent: 220 8% 11%;
     --sidebar-accent-foreground: 40 20% 96%;
     --sidebar-border: 220 8% 14%;
-    --sidebar-ring: 56 99% 67%;
+    --sidebar-ring: 43 65% 56%;
   }
 
   .light {
-    /* Light mode - Premium Yellow + White theme */
-    --primary: 56 99% 62%;
+    /* Light mode - Premium Gold + White theme */
+    --primary: 43 65% 50%;
     --primary-foreground: 0 0% 100%;
     
     --background: 40 20% 98%;
@@ -135,16 +136,16 @@
     --muted: 40 8% 92%;
     --muted-foreground: 220 5% 45%;
 
-    --accent: 56 99% 62%;
+    --accent: 43 65% 50%;
     --accent-foreground: 0 0% 100%;
 
     --border: 40 10% 88%;
     --input: 40 10% 88%;
-    --ring: 56 99% 62%;
+    --ring: 43 65% 50%;
 
-    --gold: 56 99% 62%;
-    --gold-light: 57 100% 70%;
-    --gold-dark: 54 98% 50%;
+    --gold: 43 65% 50%;
+    --gold-light: 45 70% 60%;
+    --gold-dark: 40 70% 40%;
     --dark: 220 15% 10%;
     --dark-lighter: 220 10% 20%;
     --dark-muted: 220 8% 30%;

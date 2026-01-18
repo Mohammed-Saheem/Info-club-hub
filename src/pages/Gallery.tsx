@@ -18,51 +18,35 @@ export default function Gallery() {
 
   return (
     <PageLayout>
-      {/* Hero */}
-      <section className="pt-28 pb-20 relative overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-30%,hsl(43,74%,49%,0.12),transparent_70%)]" />
+      {/* Hero - Gold gradient from left to black right */}
+      <Section variant="hero" spacing="hero">
+        {/* Extra gold glow on left side */}
+        <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-[radial-gradient(ellipse_80%_100%_at_0%_30%,hsl(43,65%,56%,0.12),transparent_70%)] pointer-events-none" />
         <GlowingOrbs />
         <FloatingParticles count={12} />
         
-        <div className="container mx-auto px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          className="max-w-3xl mx-auto text-center relative z-10"
+        >
+          <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
+            Photo <GradientText>Gallery</GradientText>
+          </h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-            className="max-w-3xl mx-auto text-center"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-8"
-            >
-              <motion.span
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                <Sparkles className="w-4 h-4 text-primary" />
-              </motion.span>
-              <span className="text-sm font-semibold text-primary">Captured Moments</span>
-            </motion.div>
-            
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
-              Photo <GradientText>Gallery</GradientText>
-            </h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-muted-foreground text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
-            >
-              Memories from our events, workshops, and team activities.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
+            Memories from our events, workshops, and team activities.
+          </motion.p>
+        </motion.div>
+      </Section>
 
-      <Section variant="gradient" spacing="lg">
+      {/* Gallery Grid - Dark section */}
+      <Section variant="dark" spacing="lg">
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
