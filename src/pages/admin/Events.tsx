@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 export default function AdminEvents() {
   const [open, setOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -87,11 +88,66 @@ export default function AdminEvents() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-events"] }); queryClient.invalidateQueries({ queryKey: ["events"] }); toast.success("Event deleted!"); },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      if (!editingEvent) return;
+      setIsUploading(true);
+      let bannerImageUrl = editingEvent.banner_image;
+
+      if (imageFile) {
+        try {
+          const uploadResult = await uploadAPI.uploadImage(imageFile);
+          bannerImageUrl = uploadResult.url;
+        } catch (error) {
+          throw new Error("Failed to upload image");
+        }
+      }
+
+      await eventsAPI.update(editingEvent.id, {
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+        event_date: formData.get("date") as string,
+        venue: formData.get("venue") as string,
+        banner_image: bannerImageUrl,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      toast.success("Event updated!");
+      setOpen(false);
+      setEditingEvent(null);
+      clearImage();
+      setIsUploading(false);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update event");
+      setIsUploading(false);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (editingEvent) {
+      updateMutation.mutate(formData);
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
   const handleDialogChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (!isOpen) {
       clearImage();
+      setEditingEvent(null);
     }
+  };
+
+  const handleEdit = (event: any) => {
+    setEditingEvent(event);
+    setImagePreview(event.banner_image);
+    setOpen(true);
   };
 
   return (
@@ -99,17 +155,17 @@ export default function AdminEvents() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="font-display text-3xl font-bold">Events</h1>
         <Dialog open={open} onOpenChange={handleDialogChange}>
-          <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Event</Button></DialogTrigger>
+          <DialogTrigger asChild><Button onClick={() => { setEditingEvent(null); clearImage(); }}><Plus className="w-4 h-4 mr-2" /> Add Event</Button></DialogTrigger>
           <DialogContent className="max-w-lg">
-            <DialogHeader><DialogTitle>Add New Event</DialogTitle></DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); createMutation.mutate(new FormData(e.currentTarget)); }} className="space-y-4">
+            <DialogHeader><DialogTitle>{editingEvent ? "Edit Event" : "Add New Event"}</DialogTitle></DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Image Upload */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Event Banner</label>
                 <div
                   className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${imagePreview
-                      ? "border-primary/50 bg-primary/5"
-                      : "border-border/50 hover:border-primary/30 hover:bg-muted/30"
+                    ? "border-primary/50 bg-primary/5"
+                    : "border-border/50 hover:border-primary/30 hover:bg-muted/30"
                     }`}
                 >
                   {imagePreview ? (
@@ -147,21 +203,22 @@ export default function AdminEvents() {
               </div>
 
               <div className="space-y-4">
-                <Input name="title" placeholder="Event Title" required className="bg-background/50" />
+                <Input name="title" defaultValue={editingEvent?.title} placeholder="Event Title" required className="bg-background/50" />
                 <div className="grid grid-cols-2 gap-4">
-                  <Input name="date" type="date" required className="bg-background/50" />
-                  <Input name="venue" placeholder="Venue" className="bg-background/50" />
+                  <Input name="date" type="date" defaultValue={editingEvent?.event_date} required className="bg-background/50" />
+                  <Input name="venue" defaultValue={editingEvent?.venue} placeholder="Venue" className="bg-background/50" />
                 </div>
                 <div className="space-y-2">
                   <Textarea
                     name="description"
+                    defaultValue={editingEvent?.description}
                     placeholder="Event Description"
                     rows={4}
                     className="bg-background/50 resize-none min-h-[100px]"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={createMutation.isPending || isUploading}>
-                  {isUploading ? "Uploading..." : createMutation.isPending ? "Creating..." : "Create Event"}
+                <Button type="submit" className="w-full" disabled={createMutation.isPending || updateMutation.isPending || isUploading}>
+                  {isUploading ? "Uploading..." : (editingEvent ? (updateMutation.isPending ? "Updating..." : "Update Event") : (createMutation.isPending ? "Creating..." : "Create Event"))}
                 </Button>
               </div>
             </form>
@@ -211,9 +268,12 @@ export default function AdminEvents() {
                   )}
                 </td>
                 <td className="p-4">
-                  <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(event.id)}>
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(event)}>Edit</Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(event.id)}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
