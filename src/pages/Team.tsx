@@ -21,7 +21,7 @@ export default function Team() {
         <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-[radial-gradient(ellipse_80%_100%_at_0%_30%,hsl(43,65%,56%,0.12),transparent_70%)] pointer-events-none" />
         <GlowingOrbs />
         <FloatingParticles count={12} />
-        
+
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
@@ -31,7 +31,7 @@ export default function Team() {
           <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-[1.1]">
             Meet Our <GradientText>Team</GradientText>
           </h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -45,8 +45,8 @@ export default function Team() {
       {/* Team Grid - Dark section */}
       <Section variant="dark" spacing="lg">
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 lg:gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
               <div key={i} className="bg-card rounded-2xl border border-border/50 overflow-hidden animate-pulse">
                 <div className="aspect-square bg-muted" />
                 <div className="p-4 space-y-2">
@@ -57,7 +57,7 @@ export default function Team() {
             ))}
           </div>
         ) : members && members.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 lg:gap-6">
             {members.map((member, i) => (
               <motion.div
                 key={member.id}
@@ -66,11 +66,11 @@ export default function Team() {
                 whileHover={{ y: -8 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
-                className="group"
+                className="group h-full"
               >
-                <div className="rounded-2xl border border-border/50 bg-gradient-to-b from-card to-card/80 overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-gold-glow">
+                <div className="h-full flex flex-col rounded-2xl border border-border/50 bg-gradient-to-b from-card to-card/80 overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-gold-glow">
                   {/* Photo */}
-                  <div className="aspect-square bg-muted overflow-hidden relative">
+                  <div className="aspect-square bg-muted overflow-hidden relative flex-shrink-0">
                     {member.photo_url ? (
                       <img
                         src={member.photo_url}
@@ -85,17 +85,17 @@ export default function Team() {
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  
+
                   {/* Info */}
-                  <div className="p-5 text-center relative">
+                  <div className="p-4 text-center relative flex-1 flex flex-col justify-between">
                     {/* Top accent */}
                     <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent group-hover:via-primary/50 transition-all duration-300" />
-                    
+
                     <h3 className="font-heading text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors duration-300">
                       {member.name}
                     </h3>
                     <p className="text-primary text-sm font-medium mb-4">{member.role}</p>
-                    
+
                     {/* Social Links */}
                     <div className="flex justify-center gap-2">
                       {member.linkedin_url && (

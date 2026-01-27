@@ -22,7 +22,6 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminEvents from "./pages/admin/Events";
-import AdminProjects from "./pages/admin/Projects";
 import AdminTeam from "./pages/admin/Team";
 import AdminGallery from "./pages/admin/Gallery";
 import AdminSubmissions from "./pages/admin/Submissions";
@@ -49,18 +48,17 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={<Auth />} />
-            
+
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="events" element={<AdminEvents />} />
-              <Route path="projects" element={<AdminProjects />} />
               <Route path="team" element={<AdminTeam />} />
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="submissions" element={<AdminSubmissions />} />
               <Route path="users" element={<AdminUsers />} />
             </Route>
-            
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

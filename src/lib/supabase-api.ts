@@ -100,6 +100,7 @@ export interface CreateTeamMemberData {
 export interface GalleryPhoto {
   id: string;
   title: string | null;
+  description: string | null;
   image_url: string;
   category: string | null;
   event_id: string | null;
@@ -109,6 +110,7 @@ export interface GalleryPhoto {
 export interface CreateGalleryPhotoData {
   image_url: string;
   title?: string;
+  description?: string;
   category?: string;
   event_id?: string;
 }
@@ -152,6 +154,8 @@ export interface AdminStats {
   gallery: number;
   unread_contacts: number;
   pending_applications: number;
+  users: number;      // New: Total users
+  submissions: number; // New: Total contact submissions
 }
 
 export interface PublicStats {
@@ -186,7 +190,7 @@ export const authAPI = {
       }
     });
     if (error) throw error;
-    
+
     // Get the profile
     const profile = await authAPI.getMe();
     return { user: profile, session: data.session };
@@ -196,7 +200,7 @@ export const authAPI = {
     const sb = ensureSupabase();
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    
+
     const profile = await authAPI.getMe();
     return { user: profile, session: data.session };
   },
@@ -217,7 +221,7 @@ export const authAPI = {
       .select('*')
       .eq('user_id', user.id)
       .single();
-    
+
     if (error) throw error;
     return profile as User;
   },
@@ -236,7 +240,7 @@ export const authAPI = {
       .eq('user_id', user.id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return { user: profile as User };
   },
@@ -275,14 +279,14 @@ export const eventsAPI = {
   getAll: async (params?: { featured?: boolean; limit?: number }): Promise<Event[]> => {
     const sb = ensureSupabase();
     let query = sb.from('events').select('*').order('event_date', { ascending: false });
-    
+
     if (params?.featured) {
       query = query.eq('is_featured', true);
     }
     if (params?.limit) {
       query = query.limit(params.limit);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return data as Event[];
@@ -295,7 +299,7 @@ export const eventsAPI = {
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) throw error;
     return data as Event;
   },
@@ -307,7 +311,7 @@ export const eventsAPI = {
       .insert(eventData)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as Event;
   },
@@ -320,7 +324,7 @@ export const eventsAPI = {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as Event;
   },
@@ -338,7 +342,7 @@ export const eventsAPI = {
       .select('*')
       .eq('event_id', eventId)
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data as EventPhoto[];
   },
@@ -350,7 +354,7 @@ export const eventsAPI = {
       .insert({ event_id: eventId, ...photoData })
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as EventPhoto;
   },
@@ -370,14 +374,14 @@ export const projectsAPI = {
   getAll: async (params?: { featured?: boolean; limit?: number }): Promise<Project[]> => {
     const sb = ensureSupabase();
     let query = sb.from('projects').select('*').order('created_at', { ascending: false });
-    
+
     if (params?.featured) {
       query = query.eq('is_featured', true);
     }
     if (params?.limit) {
       query = query.limit(params.limit);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return data as Project[];
@@ -390,7 +394,7 @@ export const projectsAPI = {
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) throw error;
     return data as Project;
   },
@@ -402,7 +406,7 @@ export const projectsAPI = {
       .insert(projectData)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as Project;
   },
@@ -415,7 +419,7 @@ export const projectsAPI = {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as Project;
   },
@@ -438,7 +442,7 @@ export const teamAPI = {
       .from('team_members')
       .select('*')
       .order('display_order', { ascending: true });
-    
+
     if (error) throw error;
     return data as TeamMember[];
   },
@@ -450,7 +454,7 @@ export const teamAPI = {
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) throw error;
     return data as TeamMember;
   },
@@ -462,7 +466,7 @@ export const teamAPI = {
       .insert(memberData)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as TeamMember;
   },
@@ -475,7 +479,7 @@ export const teamAPI = {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as TeamMember;
   },
@@ -488,7 +492,7 @@ export const teamAPI = {
 
   reorder: async (orders: { id: string; display_order: number }[]): Promise<TeamMember[]> => {
     const sb = ensureSupabase();
-    
+
     // Update each member's display_order
     for (const order of orders) {
       const { error } = await sb
@@ -497,7 +501,7 @@ export const teamAPI = {
         .eq('id', order.id);
       if (error) throw error;
     }
-    
+
     // Return updated list
     return teamAPI.getAll();
   }
@@ -511,7 +515,7 @@ export const galleryAPI = {
   getAll: async (params?: { category?: string; event_id?: string; limit?: number }): Promise<GalleryPhoto[]> => {
     const sb = ensureSupabase();
     let query = sb.from('gallery_photos').select('*').order('created_at', { ascending: false });
-    
+
     if (params?.category) {
       query = query.eq('category', params.category);
     }
@@ -521,7 +525,7 @@ export const galleryAPI = {
     if (params?.limit) {
       query = query.limit(params.limit);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return data as GalleryPhoto[];
@@ -533,9 +537,9 @@ export const galleryAPI = {
       .from('gallery_photos')
       .select('category')
       .not('category', 'is', null);
-    
+
     if (error) throw error;
-    
+
     // Extract unique categories
     const categories = [...new Set(data.map(item => item.category).filter(Boolean))];
     return categories as string[];
@@ -548,7 +552,7 @@ export const galleryAPI = {
       .insert(photoData)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as GalleryPhoto;
   },
@@ -561,7 +565,7 @@ export const galleryAPI = {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as GalleryPhoto;
   },
@@ -587,11 +591,11 @@ export const contactAPI = {
   getAll: async (params?: { is_read?: boolean }): Promise<ContactSubmission[]> => {
     const sb = ensureSupabase();
     let query = sb.from('contact_submissions').select('*').order('created_at', { ascending: false });
-    
+
     if (params?.is_read !== undefined) {
       query = query.eq('is_read', params.is_read);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return data as ContactSubmission[];
@@ -605,7 +609,7 @@ export const contactAPI = {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as ContactSubmission;
   },
@@ -631,11 +635,11 @@ export const applicationsAPI = {
   getAll: async (params?: { is_reviewed?: boolean }): Promise<JoinApplication[]> => {
     const sb = ensureSupabase();
     let query = sb.from('join_applications').select('*').order('created_at', { ascending: false });
-    
+
     if (params?.is_reviewed !== undefined) {
       query = query.eq('is_reviewed', params.is_reviewed);
     }
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return data as JoinApplication[];
@@ -649,7 +653,7 @@ export const applicationsAPI = {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as JoinApplication;
   },
@@ -668,16 +672,18 @@ export const applicationsAPI = {
 export const statsAPI = {
   getAdminStats: async (): Promise<AdminStats> => {
     const sb = ensureSupabase();
-    
-    const [events, projects, team, gallery, contacts, applications] = await Promise.all([
+
+    const [events, projects, team, gallery, contacts, applications, users, allSubmissions] = await Promise.all([
       sb.from('events').select('id', { count: 'exact', head: true }),
       sb.from('projects').select('id', { count: 'exact', head: true }),
       sb.from('team_members').select('id', { count: 'exact', head: true }),
       sb.from('gallery_photos').select('id', { count: 'exact', head: true }),
       sb.from('contact_submissions').select('id', { count: 'exact', head: true }).eq('is_read', false),
       sb.from('join_applications').select('id', { count: 'exact', head: true }).eq('is_reviewed', false),
+      sb.from('profiles').select('user_id', { count: 'exact', head: true }),
+      sb.from('contact_submissions').select('id', { count: 'exact', head: true }),
     ]);
-    
+
     return {
       events: events.count || 0,
       projects: projects.count || 0,
@@ -685,18 +691,20 @@ export const statsAPI = {
       gallery: gallery.count || 0,
       unread_contacts: contacts.count || 0,
       pending_applications: applications.count || 0,
+      users: users.count || 0,
+      submissions: allSubmissions.count || 0,
     };
   },
 
   getPublicStats: async (): Promise<PublicStats> => {
     const sb = ensureSupabase();
-    
+
     const [events, projects, team] = await Promise.all([
       sb.from('events').select('id', { count: 'exact', head: true }),
       sb.from('projects').select('id', { count: 'exact', head: true }),
       sb.from('team_members').select('id', { count: 'exact', head: true }),
     ]);
-    
+
     return {
       events: events.count || 0,
       projects: projects.count || 0,
@@ -712,23 +720,23 @@ export const statsAPI = {
 export const uploadAPI = {
   uploadImage: async (file: File, bucket: string = 'gallery'): Promise<{ url: string; filename: string }> => {
     const sb = ensureSupabase();
-    
+
     // Generate unique filename
     const ext = file.name.split('.').pop();
     const filename = `${crypto.randomUUID()}.${ext}`;
-    
+
     const { error } = await sb.storage
       .from(bucket)
       .upload(filename, file, {
         cacheControl: '3600',
         upsert: false
       });
-    
+
     if (error) throw error;
-    
+
     // Get public URL
     const { data: urlData } = sb.storage.from(bucket).getPublicUrl(filename);
-    
+
     return { url: urlData.publicUrl, filename };
   },
 
@@ -789,6 +797,7 @@ async function getAuthToken(): Promise<string> {
  * to perform admin operations. This avoids the "User not allowed" error that
  * occurs when trying to use supabase.auth.admin functions from the client.
  */
+
 export const adminUserAPI = {
   /**
    * List all users
@@ -801,12 +810,12 @@ export const adminUserAPI = {
         'Content-Type': 'application/json'
       }
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error?.message || 'Failed to list users');
     }
-    
+
     const { users } = await response.json();
     return users;
   },
@@ -822,12 +831,12 @@ export const adminUserAPI = {
         'Content-Type': 'application/json'
       }
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error?.message || 'Failed to get user');
     }
-    
+
     const { user } = await response.json();
     return user;
   },
@@ -845,12 +854,12 @@ export const adminUserAPI = {
       },
       body: JSON.stringify(data)
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error?.message || 'Failed to create user');
     }
-    
+
     const { user } = await response.json();
     return user;
   },
@@ -868,12 +877,12 @@ export const adminUserAPI = {
       },
       body: JSON.stringify(data)
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error?.message || 'Failed to update user');
     }
-    
+
     const { user } = await response.json();
     return user;
   },
@@ -890,7 +899,7 @@ export const adminUserAPI = {
         'Content-Type': 'application/json'
       }
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error?.message || 'Failed to delete user');
@@ -910,12 +919,12 @@ export const adminUserAPI = {
       },
       body: JSON.stringify({ email })
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error?.message || 'Failed to invite user');
     }
-    
+
     const { user } = await response.json();
     return user;
   },
@@ -932,12 +941,12 @@ export const adminUserAPI = {
         'Content-Type': 'application/json'
       }
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error?.message || 'Failed to reset password');
     }
-    
+
     return response.json();
   }
 };

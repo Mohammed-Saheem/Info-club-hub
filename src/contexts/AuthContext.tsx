@@ -18,6 +18,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   profileFetched: boolean;
+  lastAuthEvent: string | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -31,10 +32,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [profileFetched, setProfileFetched] = useState(false);
+  const [lastAuthEvent, setLastAuthEvent] = useState<string | null>(null);
 
   // Ref to track the user ID for which we've fetched/are fetching a profile
   // This helps prevent infinite loops during token refreshes
   const lastFetchedUserId = useRef<string | null>(null);
+
+  // Track if the user explicitly requested to sign out
+  const isManualSignOut = useRef(false);
 
   useEffect(() => {
     // If Supabase is not configured, skip auth setup
@@ -51,13 +56,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener
     // IMPORTANT: Keep this listener synchronous and lean to avoid blocking Supabase internal state updates
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log(`AuthProvider: Auth state changed [${event}]`, session?.user?.email);
+        setLastAuthEvent(event);
+
+        if (event === 'SIGNED_OUT') {
+          if (isManualSignOut.current) {
+            console.log("AuthProvider: Manual sign out detected. Clearing session.");
+            isManualSignOut.current = false; // Reset for next time
+          } else {
+            // Defensive check: Did we really lose the session, or is this a Supabase glitch?
+            console.warn("AuthProvider: Auto-logout (SIGNED_OUT) detected without user action. Double-checking...");
+
+            // Wait a tiny bit for any race conditions to settle
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const { data } = await supabase.auth.getSession();
+            if (data.session) {
+              console.warn("AuthProvider: 🛡️ FALSE ALARM! Session is still valid. Ignoring SIGNED_OUT event.");
+              // Restore/Keep the session
+              setSession(data.session);
+              setUser(data.session.user);
+              return;
+            } else {
+              console.warn("AuthProvider: Verified session is truly gone.");
+            }
+          }
+        }
 
         // Track that we've seen at least one event
         initialEventHandled = true;
 
-        // Update local state - do NOT do async work here
+        // Update local state
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -142,11 +172,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       // Fetch the profile directly using the userId
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
         .maybeSingle();
+
+      if (!data && !error) {
+        // Retry once after a short delay if profile not found immediately (helpful for new signups relying on triggers)
+        console.log("AuthProvider: Profile not found immediately, retrying in 1s...");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const retry = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", userId)
+          .maybeSingle();
+        data = retry.data;
+        error = retry.error;
+      }
 
       if (error) {
         console.error("AuthProvider: Error fetching profile:", error.message);
@@ -155,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("AuthProvider: ✅ Profile fetched successfully:", data);
         setProfile(data as Profile);
       } else {
-        console.warn("AuthProvider: No profile record found for user. The database trigger should create one shortly.");
+        console.warn("AuthProvider: No profile record found for user even after retry. The database trigger might be failing or slow.");
       }
     } catch (err) {
       console.error("AuthProvider: Unexpected profile fetch error:", err);
@@ -199,6 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     if (supabase) {
+      isManualSignOut.current = true;
       await supabase.auth.signOut();
     }
     // We don't manually reset state here anymore. 
@@ -218,6 +262,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: profile?.is_admin ?? false,
         isLoading: actuallyLoading,
         profileFetched,
+        lastAuthEvent,
         signIn,
         signUp,
         signOut,

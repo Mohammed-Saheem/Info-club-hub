@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, Users, Code, Zap, BookOpen, Trophy, Sparkles, ExternalLink, Github, ChevronRight } from "lucide-react";
+import { ArrowRight, Calendar, Users, Code, Zap, BookOpen, Trophy, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageLayout from "@/components/layout/PageLayout";
 import { useQuery } from "@tanstack/react-query";
-import { eventsAPI, projectsAPI } from "@/lib/api";
+import { eventsAPI } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { GlowingOrbs, FloatingParticles } from "@/components/ui/ambient-effects";
 import { GradientText } from "@/components/ui/animated-text";
@@ -39,11 +39,6 @@ export default function Index() {
   const { data: events } = useQuery({
     queryKey: ["featured-events"],
     queryFn: () => eventsAPI.getAll({ limit: 3 }),
-  });
-
-  const { data: projects } = useQuery({
-    queryKey: ["featured-projects"],
-    queryFn: () => projectsAPI.getAll({ featured: true, limit: 4 }),
   });
 
   return (
@@ -416,81 +411,6 @@ export default function Index() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          PROJECTS SECTION — Proof of Excellence (Grey)
-          ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 lg:py-36 bg-[hsl(220,12%,8%)] relative">
-        <div className="container mx-auto px-6 lg:px-8">
-          <motion.div {...fadeUp} className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-            <div>
-              <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-widest mb-6">
-                <span className="w-8 h-px bg-primary" />
-                Projects
-              </span>
-              <h2 className="font-heading text-4xl md:text-5xl font-bold text-foreground">
-                Featured <span className="text-gradient-gold">Projects</span>
-              </h2>
-            </div>
-            <Link to="/projects">
-              <Button variant="outline" className="group">
-                View All Projects
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </motion.div>
-
-          <div className="space-y-4">
-            {(projects && projects.length > 0 ? projects : [
-              { id: 1, title: "Campus Connect", description: "A comprehensive student networking platform for college events and cross-department collaborations", tech_stack: ["React", "Node.js", "MongoDB"], github_url: "#", demo_url: "#" },
-              { id: 2, title: "Smart Attendance", description: "AI-powered facial recognition attendance management system with real-time analytics", tech_stack: ["Python", "OpenCV", "Flask"], github_url: "#", demo_url: "#" },
-              { id: 3, title: "CodeShare", description: "Real-time collaborative code editor enabling seamless pair programming sessions", tech_stack: ["React", "Socket.io", "Express"], github_url: "#", demo_url: "#" },
-              { id: 4, title: "EcoTrack", description: "Carbon footprint calculator and sustainability tracker for eco-conscious individuals", tech_stack: ["Next.js", "Supabase", "Tailwind"], github_url: "#", demo_url: "#" },
-            ]).map((project, i) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08, ease: "easeInOut" }}
-                className="group flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-2xl border border-border/50 bg-gradient-to-r from-card/50 to-transparent hover:border-primary/30 hover:bg-card/50 transition-all duration-500 relative overflow-hidden"
-              >
-                {/* Hover accent */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-gold-dark opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                <div className="flex-1 pl-4">
-                  <h3 className="font-heading text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
-                    {project.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{project.description}</p>
-                </div>
-
-                <div className="flex items-center gap-6 pl-4 md:pl-0">
-                  <div className="flex flex-wrap gap-2">
-                    {project.tech_stack?.slice(0, 3).map((tech) => (
-                      <span key={tech} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-muted/50 backdrop-blur-sm border border-border/50 text-muted-foreground">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-1">
-                    {project.github_url && (
-                      <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl hover:bg-primary/10 transition-colors group/link">
-                        <Github className="w-5 h-5 text-muted-foreground group-hover/link:text-primary transition-colors" />
-                      </a>
-                    )}
-                    {project.demo_url && (
-                      <a href={project.demo_url} target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-xl hover:bg-primary/10 transition-colors group/link">
-                        <ExternalLink className="w-5 h-5 text-muted-foreground group-hover/link:text-primary transition-colors" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════════
           CTA SECTION — Call to Action
           ═══════════════════════════════════════════════════════════════════════ */}
       <section className="py-28 lg:py-36 relative overflow-hidden">
@@ -532,11 +452,6 @@ export default function Index() {
                 <Button size="xl" variant="secondary" className="bg-background text-foreground hover:bg-background/90 shadow-lg group">
                   Contact Us
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link to="/projects">
-                <Button size="xl" variant="ghost" className="text-primary-foreground border-2 border-primary-foreground/30 hover:bg-primary-foreground/10 hover:border-primary-foreground/50">
-                  View Projects
                 </Button>
               </Link>
             </div>
